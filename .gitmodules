@@ -1,0 +1,3 @@
+[submodule "hardware/kxkm/stm32"]
+	path = hardware/kxkm/stm32
+	url = https://github.com/tommag/Arduino_Core_STM32.git
