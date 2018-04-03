@@ -46,6 +46,9 @@
 /** @addtogroup STM32F4xx_System_Private_Includes
   * @{
   */
+
+#ifdef HAL_SPI_MODULE_ENABLED
+
 #include "stm32_def.h"
 #include "spi_com.h"
 #include "PinAF_STM32F1.h"
@@ -525,4 +528,5 @@ spi_status_e spi_transfer(spi_t *obj, uint8_t * tx_buffer,
 }
 #endif
 
+#endif
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -12,6 +12,8 @@
 // give it a name:
 uint8_t led_pins[] = {1,2,3,4};
 uint8_t power_enable_pin = 12; //Self power enable. Keep HIGH to stay powered
+uint8_t main_out_enable_pin = 6; //Load switch enable line
+uint8_t esp32_enable_pin = 7; //ESP32 enable line
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -21,6 +23,14 @@ void setup() {
 
   pinMode(power_enable_pin, OUTPUT);
   digitalWrite(power_enable_pin, HIGH);
+
+  pinMode(esp32_enable_pin, OUTPUT);
+  digitalWrite(esp32_enable_pin, HIGH);
+
+  pinMode(main_out_enable_pin, OUTPUT);
+  digitalWrite(main_out_enable_pin, HIGH);
+
+  pinMode(8, INPUT);
 }
 
 // the loop routine runs over and over again forever:
@@ -33,6 +43,6 @@ void loop() {
   digitalWrite(led_pins[1], HIGH);
   delay(1000);               // wait for a second
 
-  if (millis() > 10000)
-    digitalWrite(power_enable_pin, LOW); //cut power
+  //if (millis() > 10000)
+    //digitalWrite(power_enable_pin, LOW); //cut power
 }

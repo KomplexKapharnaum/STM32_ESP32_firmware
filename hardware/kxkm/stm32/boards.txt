@@ -749,6 +749,7 @@ KXKM_STM32F030.build.core=arduino
 KXKM_STM32F030.build.board=KXKM_STM32F030
 KXKM_STM32F030.build.extra_flags=-D{build.product_line} {build.xSerial}
 
+
 # KXKM_F030F4 board
 # Support: Serial1 (USART1 on PA10, PA9)
 KXKM_STM32F030.menu.pnum.KXKM_F030F4=KXKM F030F4

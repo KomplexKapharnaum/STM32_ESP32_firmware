@@ -47,6 +47,8 @@
 /** @addtogroup STM32F4xx_System_Private_Includes
   * @{
   */
+#ifdef HAL_I2HAL_I2C_MODULE_ENABLED
+
 #include "stm32_def.h"
 #include "twi.h"
 #include "PinAF_STM32F1.h"
@@ -698,4 +700,5 @@ void I2C4_ER_IRQHandler(void)
 }
 #endif
 
+#endif
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
