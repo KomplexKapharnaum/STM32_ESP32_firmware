@@ -14,3 +14,10 @@ In order to update the repository submodules content, you can execute the follow
 
 git submodule update --recursive
 
+## STM32 Flashing
+You have to export the compiled binary file first (Arduino > Sketch menu).
+### Using JLink
+* Keep the push button pressed to supply power while the MCU is being reprogrammed
+* Run the following commands :
+	cd <sketchName>
+	JLinkExe -commanderscript STM32_flash.jlink
