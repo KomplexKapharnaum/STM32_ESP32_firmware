@@ -1,11 +1,11 @@
 /* LED gauge functions
- * Each LED can be set individually, with a 3-bit (8 values) PWM level.
+ * Each LED can be set individually, with 5 PWM levels (0-4).
  *
  * There are multiple helper functions to light up a single LED, use the gauge as a floating point number display, etc.
- * Internally, the LED state is stored as a single unsigned long int..
+ * Internally, the LED state is stored as a single unsigned long int. Each LED uses 4 bits.
  */
 
-const uint8_t LED_PWM_MAX_VAL = 7;
+const uint8_t LED_PWM_MAX_VAL = 4;
 const uint8_t LED_COUNT = 6;
 const uint8_t LED_PINS_COUNT = 4;
 
@@ -13,6 +13,7 @@ volatile uint32_t _ledGaugeState;
 
 stimer_t _timer;
 volatile uint8_t _currentLedIndex = 0;
+volatile uint8_t _currentCycleIndex = 0; //For each LED there are LED_PWM_MAX_VAL cycles
 
 /** Initialize LED gauge display */
 void initLedGauge()
@@ -21,7 +22,7 @@ void initLedGauge()
 
   _timer.timer = TIM16;
   attachIntHandle(&_timer, ledTimerInterrupt);
-  TimerHandleInit(&_timer, 2, (uint16_t)(HAL_RCC_GetHCLKFreq() / 1000) - 1); //2ms
+  TimerHandleInit(&_timer, 1, (uint16_t)(HAL_RCC_GetHCLKFreq() / 1000) / 4); // ~1ms
 }
 
 void clearLeds()
@@ -64,15 +65,16 @@ void setLedGaugePercentage(int value)
 // Timer interrupt
 void ledTimerInterrupt(stimer_t *timer)
 {
-  for (int i = 0; i < LED_PINS_COUNT; i++)
-  pinMode(LED_PINS[i], INPUT);
-
   uint8_t value = (uint8_t)(_ledGaugeState >> (4*_currentLedIndex) ) & 0x0F;
 
-  if (value > 0)
+  if (_currentCycleIndex == 0 && value > 0)
   {
-    //Physical ordering
-    uint8_t phyIndex = LED_ORDERING[_currentLedIndex];
+    //Turn off all LEDs
+    for (int i = 0; i < LED_PINS_COUNT; i++)
+      pinMode(LED_PINS[i], INPUT);
+
+    // Light up the current LED
+    uint8_t phyIndex = LED_ORDERING[_currentLedIndex]; //Physical ordering
 
     pinMode(LED_PINS[phyIndex/2], OUTPUT);
     pinMode(LED_PINS[phyIndex/2 + 1], OUTPUT);
@@ -89,8 +91,21 @@ void ledTimerInterrupt(stimer_t *timer)
     }
   }
 
-  _currentLedIndex++;
+  if (_currentCycleIndex >= value)
+  {
+    //Turn off all LEDs
+    for (int i = 0; i < LED_PINS_COUNT; i++)
+      pinMode(LED_PINS[i], INPUT);
+  }
 
-  if (_currentLedIndex >= LED_COUNT)
-    _currentLedIndex = 0;
+  _currentCycleIndex++;
+
+  if (_currentCycleIndex >= LED_PWM_MAX_VAL)
+  {
+    _currentCycleIndex = 0;
+    _currentLedIndex++;
+
+    if (_currentLedIndex >= LED_COUNT)
+      _currentLedIndex = 0;
+  }
 }
