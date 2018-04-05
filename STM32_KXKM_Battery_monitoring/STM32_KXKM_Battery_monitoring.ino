@@ -16,6 +16,8 @@ The processor is in charge of the following tasks :
     * warning before shut down (e.g. to prevent SD card corruption)
     * display arbitrary data on the LED gauge
 
+The processor serial port is available on the ESP32 programmation connector. RX & TX must be swapped.
+
 Tom Magnier - 04/2018
 */
 
@@ -34,8 +36,17 @@ const uint8_t ESP32_TX_PIN = 8;
 
 const uint8_t LED_ORDERING[] = {1,0,3,5,4,2};
 
+// Timing configuration
+const unsigned long STARTUP_GUARD_TIME = 5000; // Ignore long presses during this period after startup
+
 
 ace_button::AceButton button(PUSH_BUTTON_DETECT_PIN);
+
+
+#define SERIAL_DEBUG(str) \
+  beginSerial(); \
+  Serial1.println(str); \
+  endSerial();
 
 void setup() {
   pinMode(POWER_ENABLE_PIN, OUTPUT);
@@ -48,8 +59,6 @@ void setup() {
 
   pinMode(ESP32_TX_PIN, INPUT); // Switch TX to High Z (shared with ESP32 programmation connector)
 
-  analogReadResolution(10);
-
   ace_button::ButtonConfig* buttonConfig = button.getButtonConfig();
   buttonConfig->setEventHandler(handleButtonEvent);
   buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureClick);
@@ -58,6 +67,8 @@ void setup() {
   // To keep interactions consistent, a long press is required to start up the board.
   // If the MCU is still powered at the end of the delay, we can move along.
   delay(button.getButtonConfig()->getLongPressDelay());
+
+  initBatteryMonitoring();
 
   //TODO check battery voltage & shut down if too low
 
@@ -68,11 +79,11 @@ void setup() {
 
   initLedGauge();
 
-  //Cycle through all LEDs
-  for (uint8_t i = 0; i < 6; i++)
+  // Start up LED animation
+  for (uint8_t i = 0; i <= 100; i++)
   {
-    setSingleLed(i);
-    delay(50);
+    setLedGaugePercentage(i);
+    delay(4);
   }
   clearLeds();
 }
@@ -80,20 +91,33 @@ void setup() {
 void loop()
 {
   button.check();
+  //setLedGaugePercentage(readBatteryPercentage());
 
-  setLedGaugePercentage((millis() % 2000) / 20);
-  delay(10);
+  //TODO battery voltage measurement and avg
 }
 
 
 void handleButtonEvent(ace_button::AceButton* button, uint8_t eventType, uint8_t buttonState) {
   switch (eventType) {
     case ace_button::AceButton::kEventClicked:
-
+      //Display the battery percentage on the LED gauge
+      //TODO
       break;
 
     case ace_button::AceButton::kEventLongPressed:
+      if (millis() > STARTUP_GUARD_TIME)
+      {
+        //Shut down LED animation
+        for (int i = 100; i >= 0; i--)
+        {
+          setLedGaugePercentage(i);
+          delay(4);
+        }
 
+        digitalWrite(MAIN_OUT_ENABLE_PIN, LOW);
+        digitalWrite(ESP32_ENABLE_PIN, LOW); //TODO send warning to ESP32 and wait for confirmation
+        pinMode(POWER_ENABLE_PIN, INPUT);
+      }
       break;
   }
 }

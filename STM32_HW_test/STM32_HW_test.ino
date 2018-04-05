@@ -93,6 +93,10 @@ void loop() {
     {
       uint32_t battVoltage = analogRead(BATT_VOLTAGE_SENSE_PIN);
       setLed(battVoltage * 6 / 1024);
+      openSerial();
+      Serial1.println(battVoltage);
+      closeSerial();
+      delay(10);
       break;
     }
 
