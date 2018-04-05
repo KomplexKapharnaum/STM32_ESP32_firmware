@@ -1,0 +1,8 @@
+usb
+speed 4000
+si SWD
+device STM32F030F4
+loadfile "STM32_ADC_calib.ino.KXKM_STM32F030F4.hex"
+r
+g
+qc

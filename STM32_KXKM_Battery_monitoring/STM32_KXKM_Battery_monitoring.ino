@@ -37,10 +37,9 @@ const uint8_t ESP32_TX_PIN = 8;
 const uint8_t LED_ORDERING[] = {1,0,3,5,4,2};
 
 // Timing configuration
-const unsigned long STARTUP_GUARD_TIME = 5000; // Ignore long presses during this period after startup
+const unsigned long STARTUP_GUARD_TIME_MS = 5000; // Ignore long presses during this period after startup
 
-
-ace_button::AceButton button(PUSH_BUTTON_DETECT_PIN);
+ace_button::AceButton button(PUSH_BUTTON_DETECT_PIN, LOW); //TODO is guard time necessary ?
 
 
 #define SERIAL_DEBUG(str) \
@@ -91,9 +90,9 @@ void setup() {
 void loop()
 {
   button.check();
-  //setLedGaugePercentage(readBatteryPercentage());
+  loopBatteryMonitoring();
 
-  //TODO battery voltage measurement and avg
+  //setLedGaugePercentage(readBatteryPercentage());
 }
 
 
@@ -105,7 +104,7 @@ void handleButtonEvent(ace_button::AceButton* button, uint8_t eventType, uint8_t
       break;
 
     case ace_button::AceButton::kEventLongPressed:
-      if (millis() > STARTUP_GUARD_TIME)
+      if (millis() > STARTUP_GUARD_TIME_MS)
       {
         //Shut down LED animation
         for (int i = 100; i >= 0; i--)

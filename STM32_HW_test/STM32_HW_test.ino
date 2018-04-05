@@ -30,7 +30,11 @@ const uint8_t LED_ORDERING[] = {1,0,3,5,4,2};
 
 const uint8_t LOAD_SENSE_GAIN = 8;
 
+const unsigned int ADC_READS_COUNT = 256; // Averaging readings to improve resolution
+const unsigned int ADC_AVG_CALIB = 16; // More average ! For calibration value
+
 enum test_type_t {
+  INIT,
   TEST_LED_1,
   TEST_LED_2,
   TEST_LOAD_SW,
@@ -39,9 +43,10 @@ enum test_type_t {
   TEST_POWER_CUT
 } currentTestType;
 
-ace_button::AceButton button(PUSH_BUTTON_DETECT_PIN);
+ace_button::AceButton button(PUSH_BUTTON_DETECT_PIN, LOW);
 
 unsigned long lastSerialSend = 0;
+bool calibrationDone = false;
 
 void setup() {
   pinMode(POWER_ENABLE_PIN, OUTPUT);
@@ -58,7 +63,7 @@ void setup() {
 
   button.setEventHandler(handleButtonEvent);
 
-  analogReadResolution(10);
+  analogReadResolution(12);
 
   //Cycle through all LEDs
   for (int i = 0; i < 6; i++)
@@ -68,7 +73,7 @@ void setup() {
   }
   clearLeds();
 
-  currentTestType = TEST_LED_1;
+  currentTestType = INIT;
 }
 
 void loop() {
@@ -85,18 +90,38 @@ void loop() {
     case TEST_LOAD_SW:
     {
       uint32_t loadSense = analogRead(LOAD_CURRENT_SENSE_PIN);
-      setLed(loadSense * 6 * LOAD_SENSE_GAIN / 1024);
+      setLed(loadSense * 6 * LOAD_SENSE_GAIN / 4095);
       break;
     }
 
     case TEST_BATT_MEAS:
     {
-      uint32_t battVoltage = analogRead(BATT_VOLTAGE_SENSE_PIN);
-      setLed(battVoltage * 6 / 1024);
+      uint32_t adcRead = readBattVoltage();
+
+      setLed(adcRead * 6 / 4095);
       openSerial();
-      Serial1.println(battVoltage);
+      Serial1.println(adcRead);
       closeSerial();
-      delay(10);
+
+      /* Wait for the button to be released because it may mess with the ADC measurement */
+      if (!calibrationDone && button.isReleased(button.getLastButtonState()))
+      {
+        //Average further the ADC value before calibration
+        for (int i = 0; i < ADC_AVG_CALIB-1; i++)
+          adcRead += readBattVoltage();
+
+        adcRead /= ADC_AVG_CALIB;
+
+        // Store the current reading as calibration value.
+        storeCalibrationValue(adcRead);
+        openSerial();
+        Serial1.print("Cal : ");
+        Serial1.println(adcRead);
+        closeSerial();
+
+        calibrationDone = true;
+      }
+
       break;
     }
 
@@ -120,6 +145,7 @@ void loop() {
   };
 
   button.check();
+  delay(5);
 }
 
 void handleButtonEvent(ace_button::AceButton* button, uint8_t eventType, uint8_t buttonState) {
@@ -225,4 +251,45 @@ void closeSerial()
 {
   Serial1.flush();
   pinMode(ESP32_TX_PIN, INPUT); //Set TX pin to Hi Z to allow ESP32 programmation from external connector
+}
+
+uint32_t readBattVoltage()
+{
+  uint32_t adcRead = 0;
+  for (int i = 0; i < ADC_READS_COUNT; i++)
+  {
+    adcRead += analogRead(BATT_VOLTAGE_SENSE_PIN);
+  }
+  adcRead /= ADC_READS_COUNT;
+
+  return adcRead;
+}
+
+void storeCalibrationValue(uint16_t calibValue)
+{
+  FLASH_OBProgramInitTypeDef OB_0, OB_1; // programming option structure
+  OB_0.DATAAddress = OB_DATA_ADDRESS_DATA0; // address of type FLASHEx_OB_Data_Address
+  OB_0.DATAData = (uint8_t)(calibValue & 0xFF); // value to be saved
+  OB_0.OptionType = OPTIONBYTE_DATA; // of type FLASHEx_OB_Type
+
+  OB_1.DATAAddress = OB_DATA_ADDRESS_DATA1; // address of type FLASHEx_OB_Data_Address
+  OB_1.DATAData = (uint8_t)((calibValue >> 8) & 0xFF); // value to be saved
+  OB_1.OptionType = OPTIONBYTE_DATA; // of type FLASHEx_OB_Type
+
+  // unlock FLASH in general
+  if(HAL_FLASH_Unlock() == HAL_OK) {
+    // unlock option bytes in particular
+    if(HAL_FLASH_OB_Unlock() == HAL_OK) {
+       // erase option bytes before programming
+       if(HAL_FLASHEx_OBErase() == HAL_OK) {
+          // program selected option byte
+          HAL_FLASHEx_OBProgram(&OB_0); // result not checked as there is no recourse at this point
+          HAL_FLASHEx_OBProgram(&OB_1); // result not checked as there is no recourse at this point
+          if(HAL_FLASH_OB_Lock() == HAL_OK) {
+             HAL_FLASH_Lock(); // again, no recourse
+            // HAL_FLASH_OB_Launch(); // reset occurs here (sorry, debugger)
+          }
+       }
+    }
+  }
 }

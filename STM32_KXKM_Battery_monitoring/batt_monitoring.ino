@@ -27,8 +27,16 @@ const unsigned int LIPO_VOLTAGE_BREAKS[] = {3500, 3650, 3700, 3750, 3825, 3950, 
 const unsigned int LIFE_VOLTAGE_BREAKS[] = {2920, 3140, 3200, 3220, 3240, 3260, 3600}; //For one cell
 
 const unsigned int ADC_READS_COUNT = 32; // Averaging readings to improve resolution
+const unsigned int CALIBRATION_VOLTAGE = 24000; // Voltage used for the calibration
+
+const unsigned long ADC_READ_PERIOD_MS = 10; // ADC read every 10ms
+
+//ADC reading : exponential averaging
+const unsigned int ADC_OLD_WEIGHT = 95;
+const unsigned int ADC_NEW_WEIGHT = 5;
 
 unsigned int _battVoltageBreaks[7];
+unsigned int _avgBattVoltage;
 
 /* Initialize battery monitoring resources and determine the type and voltage of
  the attached battery.
@@ -40,20 +48,13 @@ bool initBatteryMonitoring()
 {
   analogReadResolution(12);
 
-  unsigned int initialBattVoltage;
-
-  for (int i = 0; i < 5; i++)
-  {
-    delay(100);
-    initialBattVoltage = readBatteryVoltage();
-    SERIAL_DEBUG(initialBattVoltage);
-  }
+  _avgBattVoltage = readBatteryVoltage();
 
   switch (getBatteryTypeSelectorState())
   {
     case 0: //LiPo
     {
-      uint8_t cells = findCellCount(initialBattVoltage, LIPO_VOLTAGE_BREAKS[0], LIPO_VOLTAGE_BREAKS[6]);
+      uint8_t cells = findCellCount(_avgBattVoltage, LIPO_VOLTAGE_BREAKS[0], LIPO_VOLTAGE_BREAKS[6]);
 
       // SERIAL_DEBUG("lipo");
       // SERIAL_DEBUG(cells);
@@ -67,7 +68,7 @@ bool initBatteryMonitoring()
 
     case 1: //LiFe
     {
-      uint8_t cells = findCellCount(initialBattVoltage, LIFE_VOLTAGE_BREAKS[0], LIFE_VOLTAGE_BREAKS[6]);
+      uint8_t cells = findCellCount(_avgBattVoltage, LIFE_VOLTAGE_BREAKS[0], LIFE_VOLTAGE_BREAKS[6]);
 
       // SERIAL_DEBUG("life");
       // SERIAL_DEBUG(cells);
@@ -87,6 +88,19 @@ bool initBatteryMonitoring()
   }
 }
 
+/* Perform regular battery monitoring actions (update ADC reading, check voltage, etc) */
+void loopBatteryMonitoring()
+{
+  static unsigned long lastAdcRead = millis();
+  if (millis() - lastAdcRead > ADC_READ_PERIOD_MS)
+  {
+    lastAdcRead = millis();
+    _avgBattVoltage = (_avgBattVoltage * ADC_OLD_WEIGHT + readBatteryVoltage() * ADC_NEW_WEIGHT) / (ADC_OLD_WEIGHT + ADC_NEW_WEIGHT);
+
+    SERIAL_DEBUG(_avgBattVoltage);
+  }
+}
+
 /* Take a battery voltage measurement and return the result in mV */
 unsigned int readBatteryVoltage()
 {
@@ -101,33 +115,31 @@ unsigned int readBatteryVoltage()
 
   // unsigned long millisEnd = millis();
 
-  SERIAL_DEBUG(adcRead);
+  // SERIAL_DEBUG(adcRead);
   // SERIAL_DEBUG(millisEnd - millisStart);
 
-  //TODO calibration values
-  return adcRead * (316 + 2700) / 316 * 3300 / 4095; //Voltage is sensed through a 31.6k / 270k resistive divider, referenced to 3.3V
+  return adcRead * CALIBRATION_VOLTAGE / readCalibrationValue();
 }
 
-/* Return the battery percentage. If the percentage could not be determined, return -1
+/* Return the battery percentage using the average reading.
+   If the percentage could not be determined, return -1
  */
-int readBatteryPercentage()
+int getBatteryPercentage()
 {
   if (_battVoltageBreaks[0] == 0)
     return -1;
 
-  unsigned int voltage = readBatteryVoltage();
-
-  if (voltage < _battVoltageBreaks[0])
+  if (_avgBattVoltage < _battVoltageBreaks[0])
     return 0;
 
-  if (voltage >= _battVoltageBreaks[6])
+  if (_avgBattVoltage >= _battVoltageBreaks[6])
     return 100;
 
   for (int i = 0; i < 6; i++)
   {
-    if (voltage >= _battVoltageBreaks[i] && voltage < _battVoltageBreaks[i+1])
+    if (_avgBattVoltage >= _battVoltageBreaks[i] && _avgBattVoltage < _battVoltageBreaks[i+1])
     {
-      return (i * 100 / 6) + (voltage - _battVoltageBreaks[i]) * (100 / 6) / (_battVoltageBreaks[i+1] - _battVoltageBreaks[i]);
+      return (i * 100 / 6) + (_avgBattVoltage - _battVoltageBreaks[i]) * (100 / 6) / (_battVoltageBreaks[i+1] - _battVoltageBreaks[i]);
     }
   }
 
@@ -145,6 +157,18 @@ uint8_t getBatteryTypeSelectorState()
 
   else
     return 2;
+}
+
+/* Read the calibration value stored in the option byte.
+ */
+uint16_t readCalibrationValue()
+{
+  uint16_t ob = (HAL_FLASHEx_OBGetUserData(OB_DATA_ADDRESS_DATA1) << 8) + HAL_FLASHEx_OBGetUserData(OB_DATA_ADDRESS_DATA0);
+
+  if (ob == 0xFFFF) //Unprogrammed
+    ob = 24000 * 316 / (316+2700) * 4095 / 3300; // Default value : voltage is sensed through a 31.6k / 270k resistive divider, referenced to 3.3V
+
+  return ob;
 }
 
 /* Determine the number of cells based on the battery voltage and the given min and max cell voltages.
