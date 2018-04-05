@@ -9,7 +9,7 @@ const uint8_t LED_PWM_MAX_VAL = 4;
 const uint8_t LED_COUNT = 6;
 const uint8_t LED_PINS_COUNT = 4;
 
-volatile uint32_t _ledGaugeState;
+volatile uint32_t _ledGaugeState; // LED state. Don't change directly ! Use the helper functions. Update should be atomic because the timer interrupt may trigger at any time.
 
 stimer_t _timer;
 volatile uint8_t _currentLedIndex = 0;
@@ -51,15 +51,43 @@ void setSingleLed(uint8_t index, uint8_t value)
 void setLedGaugePercentage(int value)
 {
   value = constrain(value, 0, 100) * LED_COUNT;
-  _ledGaugeState = 0;
+  uint32_t state = 0;
 
   uint8_t i;
   for (i = 0; i < value / 100; i++)
-    _ledGaugeState |= (LED_PWM_MAX_VAL << (4*i));
+    state |= (LED_PWM_MAX_VAL << (4*i));
 
-  _ledGaugeState |= (((value - (value / 100) * 100) * LED_PWM_MAX_VAL / 100) << (4*i));
+  state |= (((value - (value / 100) * 100) * LED_PWM_MAX_VAL / 100) << (4*i));
+
+  //Atomic update
+  _ledGaugeState = state;
 }
 
+/** Use the gauge to display the battery level :
+  * If the level is unknown (-1), blinks all LEDs
+  * If the level is below 10% blink the last LED
+  */
+void displayBatteryLevel(int value)
+{
+  if (value < 0)
+  {
+    if (millis() % 1000 < 500)
+      setLedGaugePercentage(100);
+    else
+      clearLeds();
+  }
+  else if (value < BATT_LOW_LEVEL)
+  {
+    if (millis() % 1000 < 600 && millis() % 200 < 100)
+      setSingleLed(0);
+    else
+      clearLeds();
+  }
+  else
+  {
+    setLedGaugePercentage(value);
+  }
+}
 
 
 // Timer interrupt

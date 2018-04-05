@@ -38,9 +38,10 @@ const uint8_t LED_ORDERING[] = {1,0,3,5,4,2};
 
 // Timing configuration
 const unsigned long STARTUP_GUARD_TIME_MS = 5000; // Ignore long presses during this period after startup
+const unsigned long BATT_DISPLAY_TIME_MS = 3000; // Display the battery level during this time then shut down the LEDs
 
-ace_button::AceButton button(PUSH_BUTTON_DETECT_PIN, LOW); //TODO is guard time necessary ?
-
+ace_button::AceButton button(PUSH_BUTTON_DETECT_PIN, LOW);
+unsigned long battLevelDisplayStart;
 
 #define SERIAL_DEBUG(str) \
   beginSerial(); \
@@ -92,7 +93,13 @@ void loop()
   button.check();
   loopBatteryMonitoring();
 
-  //setLedGaugePercentage(readBatteryPercentage());
+  // Display the battery level if battery is low or the push button has been pressed
+  if ((millis() - battLevelDisplayStart > 0 && millis() - battLevelDisplayStart < BATT_DISPLAY_TIME_MS) || (getBatteryPercentage() > 0 && getBatteryPercentage() < 10))
+    displayBatteryLevel(getBatteryPercentage());
+  else if (millis() - battLevelDisplayStart > BATT_DISPLAY_TIME_MS)
+    clearLeds();
+
+  //TODO shutdown if battery level is too low
 }
 
 
@@ -100,7 +107,7 @@ void handleButtonEvent(ace_button::AceButton* button, uint8_t eventType, uint8_t
   switch (eventType) {
     case ace_button::AceButton::kEventClicked:
       //Display the battery percentage on the LED gauge
-      //TODO
+      battLevelDisplayStart = millis();
       break;
 
     case ace_button::AceButton::kEventLongPressed:

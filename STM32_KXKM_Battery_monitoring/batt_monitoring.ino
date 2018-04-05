@@ -31,6 +31,8 @@ const unsigned int CALIBRATION_VOLTAGE = 24000; // Voltage used for the calibrat
 
 const unsigned long ADC_READ_PERIOD_MS = 10; // ADC read every 10ms
 
+const int BATT_LOW_LEVEL = 10; // Low battery level (%)
+
 //ADC reading : exponential averaging
 const unsigned int ADC_OLD_WEIGHT = 95;
 const unsigned int ADC_NEW_WEIGHT = 5;
@@ -56,8 +58,8 @@ bool initBatteryMonitoring()
     {
       uint8_t cells = findCellCount(_avgBattVoltage, LIPO_VOLTAGE_BREAKS[0], LIPO_VOLTAGE_BREAKS[6]);
 
-      // SERIAL_DEBUG("lipo");
-      // SERIAL_DEBUG(cells);
+      SERIAL_DEBUG("LiPo");
+      SERIAL_DEBUG(cells);
       //TODO if cells=0 return false ?
 
       for (int i = 0; i < 7; i++)
@@ -70,8 +72,8 @@ bool initBatteryMonitoring()
     {
       uint8_t cells = findCellCount(_avgBattVoltage, LIFE_VOLTAGE_BREAKS[0], LIFE_VOLTAGE_BREAKS[6]);
 
-      // SERIAL_DEBUG("life");
-      // SERIAL_DEBUG(cells);
+      SERIAL_DEBUG("LiFe");
+      SERIAL_DEBUG(cells);
       //TODO if cells=0 return false ?
 
       for (int i = 0; i < 7; i++)
@@ -97,7 +99,7 @@ void loopBatteryMonitoring()
     lastAdcRead = millis();
     _avgBattVoltage = (_avgBattVoltage * ADC_OLD_WEIGHT + readBatteryVoltage() * ADC_NEW_WEIGHT) / (ADC_OLD_WEIGHT + ADC_NEW_WEIGHT);
 
-    SERIAL_DEBUG(_avgBattVoltage);
+    // SERIAL_DEBUG(_avgBattVoltage);
   }
 }
 
