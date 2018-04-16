@@ -114,7 +114,7 @@ void uart_init(serial_t *obj)
 
   //Pins Rx/Tx must not be NP
   if(uart_rx == NP || uart_tx == NP) {
-    printf("ERROR: at least one UART pin has no peripheral\n");
+    //printf("ERROR: at least one UART pin has no peripheral\n");
     return;
   }
 
@@ -122,7 +122,7 @@ void uart_init(serial_t *obj)
   obj->uart = pinmap_merge_peripheral(uart_tx, uart_rx);
 
   if(obj->uart == NP) {
-    printf("ERROR: UART pins mismatch\n");
+    //printf("ERROR: UART pins mismatch\n");
     return;
   }
   // Enable USART clock

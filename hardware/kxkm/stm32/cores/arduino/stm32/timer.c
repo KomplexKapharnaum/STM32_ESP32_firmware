@@ -544,7 +544,7 @@ uint32_t getTimerIrq(TIM_TypeDef* tim)
 #endif
          break;
      default:
-        printf("TIM: Unknown timer IRQn");
+        //printf("TIM: Unknown timer IRQn");
         break;
     }
   }
@@ -652,7 +652,7 @@ uint8_t getTimerClkSrc(TIM_TypeDef* tim)
          clkSrc = 2;
          break;
      default:
-        printf("TIM: Unknown timer instance");
+        //printf("TIM: Unknown timer instance");
         break;
     }
   }
@@ -686,7 +686,7 @@ uint32_t getTimerClkFreq(TIM_TypeDef* tim)
 #endif
     default:
     case 0:
-      printf("TIM: Unknown clock source");
+      //printf("TIM: Unknown clock source");
       break;
   }
 /* When TIMPRE bit of the RCC_DCKCFGR register is reset,
