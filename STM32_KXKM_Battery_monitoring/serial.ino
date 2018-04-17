@@ -65,7 +65,7 @@ void serialEvent1()
     {
       char tmp;
       arg = Serial1.parseInt();
-      SERIAL_DEBUG(arg); //TEMP
+      //SERIAL_DEBUG(arg);
     }
 
     switch (cmd)
@@ -137,6 +137,8 @@ void serialEvent1()
 
       case KXKM_STM32_Energy::ENTER_CRITICAL_SECTION:
         criticalSectionEndTime = millis() + constrain(arg, 0, MAX_CRITICAL_SECTION_DURATION_MS);
+        //SERIAL_DEBUG(millis());
+        //SERIAL_DEBUG(criticalSectionEndTime);
         break;
 
       case KXKM_STM32_Energy::LEAVE_CRITICAL_SECTION:

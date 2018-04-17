@@ -21,14 +21,11 @@ The processor serial port is available on the ESP32 programmation connector. RX 
 Tom Magnier - 04/2018
 */
 
-//TODO critical section doesn't work (parseInt ???)
-//TODO test ESP32 prog / STM32 serial
-
 #include <AceButton.h>
 #include "KXKM_STM32_energy_API.h"
 
 // Firmware version
-const int FIRMWARE_VERSION = 0;
+const int FIRMWARE_VERSION = 1;
 
 // Hardware definitions
 const uint8_t LED_PINS[] = {4,3,2,1};

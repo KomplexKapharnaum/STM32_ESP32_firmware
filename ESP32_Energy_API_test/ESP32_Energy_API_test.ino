@@ -16,15 +16,10 @@ The following features are tested :
 
 The main push button is used to cycle through the tests on double clicks (via STM32 serial).
 The user push button is used to select between some tests (shutdown / self reset for example)
-
-A WiFi scan is performed to force the high precision clock usage (TODO test that it's really needed)
 */
 
 #include <AceButton.h>
 #include "KXKM_STM32_energy_API.h"
-#include "WiFi.h"
-
-//TODO helper function to set LED
 
 const unsigned long BATTERY_CHECK_PERIOD_MS = 2000;
 const unsigned long BUTTON_CHECK_PERIOD_MS = 200;
@@ -53,9 +48,6 @@ void setup() {
 
   Serial.println("Beginning Energy API test sketch.");
 
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
-
   currentTestType = INIT;
 
   sendSerialCommand(KXKM_STM32_Energy::GET_API_VERSION);
@@ -76,8 +68,6 @@ void setup() {
     case KXKM_STM32_Energy::BATTERY_LIFE: Serial.println("LiFe"); break;
     case KXKM_STM32_Energy::BATTERY_CUSTOM: Serial.println("custom"); break;
   }
-
-  scanWifi();
 }
 
 void loop() {
@@ -227,31 +217,4 @@ void endTest(test_type_t test)
     default:
       break;
   };
-}
-
-void scanWifi()
-{
-  Serial.println("scan start");
-
-  // WiFi.scanNetworks will return the number of networks found
-  int n = WiFi.scanNetworks();
-  Serial.println("scan done");
-  if (n == 0) {
-      Serial.println("no networks found");
-  } else {
-      Serial.print(n);
-      Serial.println(" networks found");
-      for (int i = 0; i < n; ++i) {
-          // Print SSID and RSSI for each network found
-          Serial.print(i + 1);
-          Serial.print(": ");
-          Serial.print(WiFi.SSID(i));
-          Serial.print(" (");
-          Serial.print(WiFi.RSSI(i));
-          Serial.print(")");
-          Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
-          delay(10);
-      }
-  }
-  Serial.println("");
 }
