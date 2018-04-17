@@ -21,7 +21,6 @@ The processor serial port is available on the ESP32 programmation connector. RX 
 Tom Magnier - 04/2018
 */
 
-//TODO Watchdog
 //TODO critical section doesn't work (parseInt ???)
 //TODO test ESP32 prog / STM32 serial
 
@@ -126,11 +125,13 @@ void setup() {
   }
   clearLeds();
 
+  initWatchdog();
   enterState(ESP32_STARTUP);
 }
 
 void loop()
 {
+  refreshWatchdog();
   button.check();
   loopBatteryMonitoring();
 
