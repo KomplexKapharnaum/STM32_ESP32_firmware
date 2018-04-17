@@ -22,9 +22,6 @@ Tom Magnier - 04/2018
 */
 
 //TODO Watchdog
-//TODO interpolate batt characteristics
-//TODO accept batt characteristics only in custom mode
-//TODO send current batt selector
 //TODO critical section doesn't work (parseInt ???)
 //TODO test ESP32 prog / STM32 serial
 
@@ -82,6 +79,8 @@ void setup() {
   pinMode(ESP32_ENABLE_PIN, OUTPUT);
   pinMode(MAIN_OUT_ENABLE_PIN, OUTPUT);
   pinMode(PUSH_BUTTON_DETECT_PIN, INPUT);
+
+  setESP32State(false); //Force reset if necesary
 
   for (int i = 0; i < 2; i++)
     pinMode(BATT_TYPE_SELECTOR_PINS[i], INPUT_PULLUP);

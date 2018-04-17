@@ -14,7 +14,7 @@ The following features are tested :
     * requesting a shutdown (user push button)
   * Request a self reset
 
-The main push button is used to cycle through the tests (via STM32 serial).
+The main push button is used to cycle through the tests on double clicks (via STM32 serial).
 The user push button is used to select between some tests (shutdown / self reset for example)
 
 A WiFi scan is performed to force the high precision clock usage (TODO test that it's really needed)
@@ -68,6 +68,15 @@ void setup() {
   Serial.print("STM32 firmware version : ");
   Serial.println(readSerialAnswer());
 
+  sendSerialCommand(KXKM_STM32_Energy::GET_BATTERY_TYPE);
+  Serial.print("Battery type : ");
+  switch (readSerialAnswer())
+  {
+    case KXKM_STM32_Energy::BATTERY_LIPO: Serial.println("LiPo"); break;
+    case KXKM_STM32_Energy::BATTERY_LIFE: Serial.println("LiFe"); break;
+    case KXKM_STM32_Energy::BATTERY_CUSTOM: Serial.println("custom"); break;
+  }
+
   scanWifi();
 }
 
@@ -93,9 +102,9 @@ void loop() {
     lastButtonCheck = millis();
     sendSerialCommand(KXKM_STM32_Energy::GET_BUTTON_EVENT);
 
-    if (readSerialAnswer() == KXKM_STM32_Energy::BUTTON_CLICK_EVENT)
+    if (readSerialAnswer() == KXKM_STM32_Energy::BUTTON_DOUBLE_CLICK_EVENT)
     {
-      Serial.println("Main button clicked.");
+      Serial.println("Main button double clicked.");
       endTest(currentTestType);
       currentTestType = (test_type_t)((int)currentTestType + 1);
       beginTest(currentTestType);
@@ -183,7 +192,7 @@ void beginTest(test_type_t test)
     case TEST_CUSTOM_BATT:
       Serial.println("Setting new battery characteristics.");
       sendSerialCommand(KXKM_STM32_Energy::SET_BATTERY_VOLTAGE_LOW, 12000);
-      //TODO set intermediate levels
+      sendSerialCommand(KXKM_STM32_Energy::SET_BATTERY_VOLTAGE_3, 12500);
       sendSerialCommand(KXKM_STM32_Energy::SET_BATTERY_VOLTAGE_6, 14000);
       break;
 

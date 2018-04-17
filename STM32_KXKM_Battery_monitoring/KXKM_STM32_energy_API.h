@@ -42,6 +42,11 @@ public:
        The STM32 will answer with the estimated battery level. */
     GET_BATTERY_PERCENTAGE = '%',
 
+    /* Get battery type as set by the 3-way selector.
+       No argument.
+       See enum BatteryType for the possible answers from the STM32. */
+    GET_BATTERY_TYPE = 'T',
+
     /* Set the LEDs independently.
        Argument : for each LED a number between 0 (Off) and 4 (On). Missing LEDs will be treated as 0.
         Example : 444000 will set the first 3 LEDs to full brightness and the last 3 to Off.
@@ -115,6 +120,13 @@ public:
 
     /* Button double click */
     BUTTON_DOUBLE_CLICK_EVENT = 2
+  };
+
+  /* Possible answers to the "Get battery type" command */
+  enum BatteryType {
+    BATTERY_LIPO = 0,
+    BATTERY_LIFE = 1,
+    BATTERY_CUSTOM = 2
   };
 
   static bool hasArgument(CommandType cmd)

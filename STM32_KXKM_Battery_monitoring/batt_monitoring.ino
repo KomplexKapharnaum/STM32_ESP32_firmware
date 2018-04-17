@@ -54,7 +54,7 @@ bool initBatteryMonitoring()
 
   switch (getBatteryTypeSelectorState())
   {
-    case 0: //LiPo
+    case KXKM_STM32_Energy::BATTERY_LIPO: //LiPo
     {
       uint8_t cells = findCellCount(_avgBattVoltage, LIPO_VOLTAGE_BREAKS[0], LIPO_VOLTAGE_BREAKS[6]);
 
@@ -70,7 +70,7 @@ bool initBatteryMonitoring()
       break;
     }
 
-    case 1: //LiFe
+    case KXKM_STM32_Energy::BATTERY_LIFE: //LiFe
     {
       uint8_t cells = findCellCount(_avgBattVoltage, LIFE_VOLTAGE_BREAKS[0], LIFE_VOLTAGE_BREAKS[6]);
 
@@ -85,7 +85,7 @@ bool initBatteryMonitoring()
 
       break;
     }
-    case 2: //Custom. Battery monitoring disabled or will be set later.
+    case KXKM_STM32_Energy::BATTERY_CUSTOM: //Custom. Battery monitoring disabled or will be set later.
     default:
       // SERIAL_DEBUG("custom");
       for (int i = 0; i < 7; i++)
@@ -130,12 +130,13 @@ unsigned int readBatteryVoltage()
 }
 
 /* Return the battery percentage using the average reading.
+   At least the low and high voltage breaks are required.
+
    If the percentage could not be determined, return -1
-   TODO if not all voltage breaks are present !?
  */
 int getBatteryPercentage()
 {
-  if (_battVoltageBreaks[0] == 0)
+  if (_battVoltageBreaks[0] == 0 || _battVoltageBreaks[6] == 0)
     return -1;
 
   if (_avgBattVoltage < _battVoltageBreaks[0])
@@ -144,28 +145,35 @@ int getBatteryPercentage()
   if (_avgBattVoltage >= _battVoltageBreaks[6])
     return 100;
 
-  for (int i = 0; i < 6; i++)
+  // Find out the first defined voltage break above 0 and interpolate between break 0 and this break.
+  // Then repeat starting with the first break above 0
+  uint8_t lowerIdx = 0;
+  while (lowerIdx < 6)
   {
-    if (_avgBattVoltage >= _battVoltageBreaks[i] && _avgBattVoltage < _battVoltageBreaks[i+1])
-    {
-      return (i * 100 / 6) + (_avgBattVoltage - _battVoltageBreaks[i]) * (100 / 6) / (_battVoltageBreaks[i+1] - _battVoltageBreaks[i]);
-    }
+    uint8_t upperIdx = lowerIdx + 1;
+    while (_battVoltageBreaks[upperIdx] == 0 && upperIdx <= 6)
+      upperIdx++;
+
+    if (_avgBattVoltage >= _battVoltageBreaks[lowerIdx] && _avgBattVoltage < _battVoltageBreaks[upperIdx])
+      return (lowerIdx * 100 / 6) + (_avgBattVoltage - _battVoltageBreaks[lowerIdx]) * (upperIdx - lowerIdx) * (100 / 6) / (_battVoltageBreaks[upperIdx] - _battVoltageBreaks[lowerIdx]);
+
+    lowerIdx = upperIdx;
   }
 
   return -1; //should have returned before !
 }
 
 /* Read the battery type selector */
-uint8_t getBatteryTypeSelectorState()
+KXKM_STM32_Energy::BatteryType getBatteryTypeSelectorState()
 {
   if (!digitalRead(BATT_TYPE_SELECTOR_PINS[0]))
-    return 0;
+    return KXKM_STM32_Energy::BATTERY_LIPO;
 
   else if (!digitalRead(BATT_TYPE_SELECTOR_PINS[1]))
-    return 1;
+    return KXKM_STM32_Energy::BATTERY_LIFE;
 
   else
-    return 2;
+    return KXKM_STM32_Energy::BATTERY_CUSTOM;
 }
 
 /* Read the calibration value stored in the option byte.

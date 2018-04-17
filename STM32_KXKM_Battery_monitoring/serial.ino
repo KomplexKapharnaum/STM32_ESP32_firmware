@@ -86,6 +86,10 @@ void serialEvent1()
         sendAnswer(getBatteryPercentage());
         break;
 
+      case KXKM_STM32_Energy::GET_BATTERY_TYPE:
+        sendAnswer(getBatteryTypeSelectorState());
+        break;
+
       case KXKM_STM32_Energy::SET_LEDS:
         customLedSetTime = millis();
         for (int i = 0; i < 6; i++)
@@ -126,7 +130,9 @@ void serialEvent1()
       case KXKM_STM32_Energy::SET_BATTERY_VOLTAGE_4:
       case KXKM_STM32_Energy::SET_BATTERY_VOLTAGE_5:
       case KXKM_STM32_Energy::SET_BATTERY_VOLTAGE_6:
-        _battVoltageBreaks[cmd - KXKM_STM32_Energy::SET_BATTERY_VOLTAGE_LOW] = arg;
+        //Accept custom batt characteristics only if the selector is on "Custom" position
+        if (getBatteryTypeSelectorState() == KXKM_STM32_Energy::BATTERY_CUSTOM)
+          _battVoltageBreaks[cmd - KXKM_STM32_Energy::SET_BATTERY_VOLTAGE_LOW] = arg;
         break;
 
       case KXKM_STM32_Energy::ENTER_CRITICAL_SECTION:
