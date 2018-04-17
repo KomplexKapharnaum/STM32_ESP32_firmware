@@ -22,8 +22,8 @@ void setESP32State(bool state)
 /* Full shutdown sequence */
 void shutdown()
 {
-  //TODO handle critical section here ?
+  clearLeds();
   setLoadSwitchState(false);
   setESP32State(false);
-  set3V3RegState(false); //Bye bye !
+  pinMode(POWER_ENABLE_PIN, INPUT); //Bye bye !
 }

@@ -13,7 +13,7 @@ The processor is in charge of the following tasks :
     * battery level reporting
     * custom battery profile input
     * push button reporting
-    * warning before shut down (e.g. to prevent SD card corruption)
+    * critical section handling (the board will stay powered if the main processor requests it)
     * display arbitrary data on the LED gauge
 
 The processor serial port is available on the ESP32 programmation connector. RX & TX must be swapped.
@@ -22,11 +22,17 @@ Tom Magnier - 04/2018
 */
 
 //TODO Watchdog
-//TODO state machine : release bouton, activation esp, activation load sw, attente section critique, etc
-//TODO display single led when on
+//TODO interpolate batt characteristics
+//TODO accept batt characteristics only in custom mode
+//TODO send current batt selector
+//TODO critical section doesn't work (parseInt ???)
+//TODO test ESP32 prog / STM32 serial
 
 #include <AceButton.h>
 #include "KXKM_STM32_energy_API.h"
+
+// Firmware version
+const int FIRMWARE_VERSION = 0;
 
 // Hardware definitions
 const uint8_t LED_PINS[] = {4,3,2,1};
@@ -44,14 +50,31 @@ const uint8_t LED_ORDERING[] = {1,0,3,5,4,2};
 // Timing configuration
 const unsigned long STARTUP_GUARD_TIME_MS = 5000; // Ignore long presses during this period after startup
 const unsigned long BATT_DISPLAY_TIME_MS = 3000; // Display the battery level during this time then shut down the LEDs
+const unsigned long LOAD_SWITCH_START_DELAY_MS = 2000; // Start the load switch after this delay (to allow the ESP32 to disable the load switch if needed)
+const unsigned long MAX_CRITICAL_SECTION_DURATION_MS = 10000; // Maximum critical section duration.
+const unsigned long CUSTOM_LED_DISPLAY_TIME_MS = 2000; // Display the custom LED display during this period (set by serial API)
+
+enum state_t {
+  INIT,
+  ESP32_STARTUP,
+  ACTIVE,
+  CRITICAL_SECTION_WAIT,
+  SHUTDOWN
+};
+
+state_t currentState;
+void enterState(enum state_t newState); // F*** Arduino. Explicit prototype function to avoid the auto generated one.
 
 ace_button::AceButton button(PUSH_BUTTON_DETECT_PIN, LOW);
 KXKM_STM32_Energy::PushButtonEvent buttonEvent = KXKM_STM32_Energy::NO_EVENT;
-unsigned long battLevelDisplayStart;
+unsigned long battLevelDisplayStartTime;
+unsigned long customLedSetTime;
+unsigned long lastStateChangeTime;
+unsigned long criticalSectionEndTime;
 
 #define SERIAL_DEBUG(str) \
   beginSerial(); \
-  Serial1.println(str); \
+  Serial1.print(str); \
   endSerial();
 
 void setup() {
@@ -63,9 +86,7 @@ void setup() {
   for (int i = 0; i < 2; i++)
     pinMode(BATT_TYPE_SELECTOR_PINS[i], INPUT_PULLUP);
 
-  pinMode(ESP32_TX_PIN, INPUT); // Switch TX to High Z (shared with ESP32 programmation connector)
-
-  Serial1.setTimeout(10);
+  initSerial();
 
   ace_button::ButtonConfig* buttonConfig = button.getButtonConfig();
   buttonConfig->setEventHandler(handleButtonEvent);
@@ -77,16 +98,26 @@ void setup() {
   // If the MCU is still powered at the end of the delay, we can move along.
   delay(button.getButtonConfig()->getLongPressDelay());
 
-  initBatteryMonitoring();
+  currentState = INIT;
 
-  //TODO check battery voltage & shut down if too low
+  initLedGauge();
+
+  // Shut down immediately if the battery type could not be determined and the
+  // selector is not in "Custom" position
+  if (!initBatteryMonitoring())
+  {
+    //Blink red LED while the board is powered (button pressed)
+    while(1)
+    {
+      setSingleLed(0, 1);
+      delay(50);
+      clearLeds();
+      delay(50);
+    }
+  }
 
   // Power up the board
   set3V3RegState(true); //Keep 3.3V regulator enabled
-  setLoadSwitchState(true); //TODO after 2s if no disable command has been received
-  setESP32State(true); //Enable ESP32
-
-  initLedGauge();
 
   // Start up LED animation
   for (uint8_t i = 0; i <= 100; i++)
@@ -95,6 +126,8 @@ void setup() {
     delay(4);
   }
   clearLeds();
+
+  enterState(ESP32_STARTUP);
 }
 
 void loop()
@@ -102,13 +135,47 @@ void loop()
   button.check();
   loopBatteryMonitoring();
 
-  // Display the battery level if battery is low or the push button has been pressed
-  if ((millis() - battLevelDisplayStart > 0 && millis() - battLevelDisplayStart < BATT_DISPLAY_TIME_MS) || (getBatteryPercentage() > 0 && getBatteryPercentage() < 10))
-    displayBatteryLevel(getBatteryPercentage());
-  else if (millis() - battLevelDisplayStart > BATT_DISPLAY_TIME_MS)
-    clearLeds();
+  switch (currentState)
+  {
+    case ESP32_STARTUP:
+      if (millis() - lastStateChangeTime > LOAD_SWITCH_START_DELAY_MS)
+      {
+        setLoadSwitchState(true);
+        enterState(ACTIVE);
+      }
+      break;
 
-  //TODO shutdown if battery level is too low
+    case ACTIVE:
+      if (millis() - customLedSetTime > CUSTOM_LED_DISPLAY_TIME_MS)
+      {
+        // Display the battery level if battery is low or the push button has been pressed
+        if ((millis() - battLevelDisplayStartTime > 0 && millis() - battLevelDisplayStartTime < BATT_DISPLAY_TIME_MS) || (getBatteryPercentage() >= 0 && getBatteryPercentage() < 10))
+          displayBatteryLevel(getBatteryPercentage());
+        else if (millis() - battLevelDisplayStartTime > BATT_DISPLAY_TIME_MS)
+          displaySingleLedBatteryLevel(getBatteryPercentage());
+      }
+
+      if (getBatteryPercentage() == 0)
+        enterState(CRITICAL_SECTION_WAIT); //Start shutdown process
+      break;
+
+    case CRITICAL_SECTION_WAIT:
+      // Display a wait indicator
+      {
+        uint8_t idx = ((millis() - lastStateChangeTime) % 1100) / 100;
+        if (idx < 6)
+          setSingleLed(idx);
+        else
+          setSingleLed(10 - idx);
+      }
+
+      if (millis() > criticalSectionEndTime || millis() - lastStateChangeTime > MAX_CRITICAL_SECTION_DURATION_MS)
+        enterState(SHUTDOWN);
+      break;
+
+    default:
+      break;
+  }
 }
 
 
@@ -116,7 +183,7 @@ void handleButtonEvent(ace_button::AceButton* button, uint8_t eventType, uint8_t
   switch (eventType) {
     case ace_button::AceButton::kEventClicked:
       //Display the battery percentage on the LED gauge
-      battLevelDisplayStart = millis();
+      battLevelDisplayStartTime = millis();
       buttonEvent = KXKM_STM32_Energy::BUTTON_CLICK_EVENT;
       break;
 
@@ -134,10 +201,39 @@ void handleButtonEvent(ace_button::AceButton* button, uint8_t eventType, uint8_t
           delay(4);
         }
 
-        digitalWrite(MAIN_OUT_ENABLE_PIN, LOW);
-        digitalWrite(ESP32_ENABLE_PIN, LOW); //TODO send warning to ESP32 and wait for confirmation
-        pinMode(POWER_ENABLE_PIN, INPUT);
+        enterState(CRITICAL_SECTION_WAIT); //Start shutdown process
       }
       break;
   }
+}
+
+
+void enterState(enum state_t newState)
+{
+  // SERIAL_DEBUG(newState);
+
+  // Exit current state actions
+  switch (currentState)
+  {
+    default:
+      break;
+  }
+
+  // Enter new state actions
+  switch (newState)
+  {
+    case ESP32_STARTUP:
+      setESP32State(true); //Enable ESP32
+      break;
+
+    case SHUTDOWN:
+      shutdown();
+      break;
+
+    default:
+      break;
+  }
+
+  currentState = newState;
+  lastStateChangeTime = millis();
 }

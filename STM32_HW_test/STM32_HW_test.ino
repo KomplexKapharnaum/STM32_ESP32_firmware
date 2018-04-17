@@ -12,6 +12,10 @@ The following features are tested :
 
 The main push button is used to cycle through the tests.
 
+When reading the battery voltage, a calibration value is stored.
+
+REMEMBER TO SET THE SUPPLY VOLTAGE TO 24V BEFORE SWITCHING TO THE BATT TEST !
+
 */
 
 #include <AceButton.h>

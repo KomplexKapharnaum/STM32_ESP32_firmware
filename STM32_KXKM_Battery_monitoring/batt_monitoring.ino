@@ -26,16 +26,16 @@
 const unsigned int LIPO_VOLTAGE_BREAKS[] = {3500, 3650, 3700, 3750, 3825, 3950, 4200}; //For one cell
 const unsigned int LIFE_VOLTAGE_BREAKS[] = {2920, 3140, 3200, 3220, 3240, 3260, 3600}; //For one cell
 
-const unsigned int ADC_READS_COUNT = 32; // Averaging readings to improve resolution
+const unsigned int ADC_READS_COUNT = 4; // Averaging readings to improve resolution
 const unsigned int CALIBRATION_VOLTAGE = 24000; // Voltage used for the calibration
 
-const unsigned long ADC_READ_PERIOD_MS = 10; // ADC read every 10ms
+const unsigned long ADC_READ_PERIOD_MS = 5; // ADC read every 10ms
 
 const int BATT_LOW_LEVEL = 10; // Low battery level (%)
 
 //ADC reading : exponential averaging
-const unsigned int ADC_OLD_WEIGHT = 95;
-const unsigned int ADC_NEW_WEIGHT = 5;
+const unsigned int ADC_OLD_WEIGHT = 97;
+const unsigned int ADC_NEW_WEIGHT = 3;
 
 unsigned int _battVoltageBreaks[7];
 unsigned int _avgBattVoltage;
@@ -60,10 +60,12 @@ bool initBatteryMonitoring()
 
       SERIAL_DEBUG("LiPo");
       SERIAL_DEBUG(cells);
-      //TODO if cells=0 return false ?
 
       for (int i = 0; i < 7; i++)
         _battVoltageBreaks[i] = cells * LIPO_VOLTAGE_BREAKS[i];
+
+      if (cells == 0)
+        return false; // The selector is on the LiPo / LiFe state but the voltage doesn't match !
 
       break;
     }
@@ -74,10 +76,12 @@ bool initBatteryMonitoring()
 
       SERIAL_DEBUG("LiFe");
       SERIAL_DEBUG(cells);
-      //TODO if cells=0 return false ?
 
       for (int i = 0; i < 7; i++)
         _battVoltageBreaks[i] = cells * LIFE_VOLTAGE_BREAKS[i];
+
+      if (cells == 0)
+        return false; // The selector is on the LiPo / LiFe state but the voltage doesn't match !
 
       break;
     }
@@ -88,6 +92,8 @@ bool initBatteryMonitoring()
         _battVoltageBreaks[i] = 0;
       break;
   }
+
+  return true;
 }
 
 /* Perform regular battery monitoring actions (update ADC reading, check voltage, etc) */
@@ -125,6 +131,7 @@ unsigned int readBatteryVoltage()
 
 /* Return the battery percentage using the average reading.
    If the percentage could not be determined, return -1
+   TODO if not all voltage breaks are present !?
  */
 int getBatteryPercentage()
 {

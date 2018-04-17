@@ -8,9 +8,28 @@
  */
 #include "KXKM_STM32_energy_API.h"
 
-void beginSerial()
+void initSerial()
 {
   Serial1.begin(115200);
+  Serial1.setTimeout(2);
+  endSerial();
+}
+
+void beginSerial()
+{
+  //Set TX pin to UART TX function. Taken from uart.c
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_TypeDef *port;
+  uint32_t function = (uint32_t)NC;
+
+  port = set_GPIO_Port_Clock(STM_PORT(digitalPinToPinName(PIN_SERIAL_TX)));
+  function = pinmap_function(digitalPinToPinName(PIN_SERIAL_TX), PinMap_UART_TX);
+  GPIO_InitStruct.Pin         = STM_GPIO_PIN(digitalPinToPinName(PIN_SERIAL_TX));
+  GPIO_InitStruct.Mode        = STM_PIN_MODE(function);
+  GPIO_InitStruct.Speed       = GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStruct.Pull        = STM_PIN_PUPD(function);
+  GPIO_InitStruct.Alternate   = STM_PIN_AFNUM(function);
+  HAL_GPIO_Init(port, &GPIO_InitStruct);
 }
 
 void endSerial()
@@ -21,16 +40,44 @@ void endSerial()
 
 void serialEvent1()
 {
-  if (Serial1.find(KXKM_STM32_Energy::PREAMBLE))
+  //SERIAL_DEBUG(Serial1.readStringUntil('\n'));
+
+  while (Serial1.available())
   {
-    char cmd = Serial1.read();
+    char rdChar = Serial1.peek();
+    if (rdChar == KXKM_STM32_Energy::PREAMBLE[0])
+      break;
+    else
+      Serial1.read();
+  }
+
+  if (Serial1.findUntil(KXKM_STM32_Energy::PREAMBLE, "\n"))
+  {
+    char cmd;
+    Serial1.readBytesUntil(' ', &cmd, 1); //Wait if necessary for data to arrive
     long arg = 0;
 
+    // SERIAL_DEBUG(cmd);
+    // SERIAL_DEBUG(Serial1.available());
+    // SERIAL_DEBUG(Serial1.readStringUntil('\n'));
+
     if (KXKM_STM32_Energy::hasArgument((KXKM_STM32_Energy::CommandType)cmd))
+    {
+      char tmp;
       arg = Serial1.parseInt();
+      SERIAL_DEBUG(arg); //TEMP
+    }
 
     switch (cmd)
     {
+      case KXKM_STM32_Energy::GET_API_VERSION:
+        sendAnswer(KXKM_STM32_Energy::API_VERSION);
+        break;
+
+      case KXKM_STM32_Energy::GET_FW_VERSION:
+        sendAnswer(FIRMWARE_VERSION);
+        break;
+
       case KXKM_STM32_Energy::GET_BATTERY_VOLTAGE:
         sendAnswer(_avgBattVoltage);
         break;
@@ -40,25 +87,30 @@ void serialEvent1()
         break;
 
       case KXKM_STM32_Energy::SET_LEDS:
+        customLedSetTime = millis();
         for (int i = 0; i < 6; i++)
         {
-          setSingleLed(i, arg % 10);
+          // SERIAL_DEBUG(arg % 10);
+          setLed(i, arg % 10);
           arg /= 10;
         }
         break;
 
       case KXKM_STM32_Energy::SET_LED_GAUGE:
+        customLedSetTime = millis();
         setLedGaugePercentage(arg);
         break;
 
       case KXKM_STM32_Energy::SET_LOAD_SWITCH:
-        //TODO if not set disable autoset
         setLoadSwitchState(arg > 0);
+
+        //Override default behavior if still in ESP32 startup time
+        if (currentState == ESP32_STARTUP)
+          enterState(ACTIVE);
         break;
 
       case KXKM_STM32_Energy::SHUTDOWN:
-        //TODO leave critical section ?
-        shutdown();
+        enterState(SHUTDOWN);
         break;
 
       case KXKM_STM32_Energy::REQUEST_RESET:
@@ -78,12 +130,11 @@ void serialEvent1()
         break;
 
       case KXKM_STM32_Energy::ENTER_CRITICAL_SECTION:
-        //TODO
-        //TODO max timeout
+        criticalSectionEndTime = millis() + constrain(arg, 0, MAX_CRITICAL_SECTION_DURATION_MS);
         break;
 
       case KXKM_STM32_Energy::LEAVE_CRITICAL_SECTION:
-        //TODO
+        criticalSectionEndTime = millis();
         break;
 
       case KXKM_STM32_Energy::GET_BUTTON_EVENT:

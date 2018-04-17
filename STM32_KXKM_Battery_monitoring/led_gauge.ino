@@ -47,6 +47,26 @@ void setSingleLed(uint8_t index, uint8_t value)
   _ledGaugeState = value << (4*index);
 }
 
+/** Set a LED at full brightness without clearing the others */
+void setLed(uint8_t index)
+{
+  setLed(index, LED_PWM_MAX_VAL);
+}
+
+/** Set a LED at the specified value without clearing the others */
+void setLed(uint8_t index, uint8_t value)
+{
+  index = constrain(index, 0, LED_COUNT-1);
+  value = constrain(value, 0, LED_PWM_MAX_VAL);
+
+  uint32_t state = _ledGaugeState;
+
+  state &= ~(0x0F << (4*index));
+  state |= value << (4*index);
+
+  _ledGaugeState = state;
+}
+
 /** Use the gauge to display a number in the range [0 - 100] */
 void setLedGaugePercentage(int value)
 {
@@ -89,6 +109,14 @@ void displayBatteryLevel(int value)
   }
 }
 
+/* Display the battery level on a single LED, as a 'ON' indicator. */
+void displaySingleLedBatteryLevel(int value)
+{
+  if (value < 0)
+    setSingleLed(0, 1);
+  else
+    setSingleLed(value * 6 / 100, 1);
+}
 
 // Timer interrupt
 void ledTimerInterrupt(stimer_t *timer)
