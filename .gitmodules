@@ -4,3 +4,12 @@
 [submodule "libraries/PCM51xx_Arduino"]
 	path = libraries/PCM51xx_Arduino
 	url = https://github.com/tommag/PCM51xx_Arduino.git
+[submodule "libraries/ESP8266Audio"]
+	path = libraries/ESP8266Audio
+	url = https://github.com/earlephilhower/ESP8266Audio.git
+[submodule "libraries/ESP8266_Spiram"]
+	path = libraries/ESP8266_Spiram
+	url = https://github.com/Gianbacchio/ESP8266_Spiram.git
+[submodule "hardware/espressif/esp32"]
+	path = hardware/espressif/esp32
+	url = https://github.com/espressif/arduino-esp32.git
