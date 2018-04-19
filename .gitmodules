@@ -1,3 +1,6 @@
 [submodule "hardware/kxkm/stm32"]
 	path = hardware/kxkm/stm32
-	url = https://github.com/tommag/Arduino_Core_STM32.git
+	url = https://github.com/KomplexKapharnaum/Arduino_Core_STM32.git
+[submodule "libraries/PCM51xx_Arduino"]
+	path = libraries/PCM51xx_Arduino
+	url = https://github.com/tommag/PCM51xx_Arduino.git
