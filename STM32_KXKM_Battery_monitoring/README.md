@@ -1,5 +1,13 @@
 # STM32 - Monitoring batterie
 
+## Compilation
+Dans les préférences Arduino ajouter https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json à la liste "URL de gestionnaire de cartes supplémentaires" puis installer STM32 Cores depuis le gestionnaire de carte (pour installer les outils, etc).
+
+
+* Type de carte : KXKM_STM32F030 (dans le 2e menu STM32)
+* Serial interface : Generic interface
+* Optimize : Smallest (-Os) with LTO
+
 ## Démarrage / extinction
 Un appui long sur le bouton est nécessaire pour démarrer la carte. Un nouvel appui long déclenche l'extinction.
 

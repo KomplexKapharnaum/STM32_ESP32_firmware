@@ -17,6 +17,10 @@ If you already cloned the repository you have to run
 In order to update the repository submodules content, you can execute the following command regularly:
 
     git submodule update --recursive
+    
+## ESP32 installation
+Execute `hardware/espressif/esp32/tools/get.py`
+
 
 ## STM32 Flashing
 You have to export the compiled binary file first (Arduino > Sketch menu).
