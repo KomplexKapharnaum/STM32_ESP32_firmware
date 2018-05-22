@@ -26,6 +26,8 @@
 const unsigned int LIPO_VOLTAGE_BREAKS[] = {3500, 3650, 3700, 3750, 3825, 3950, 4200}; //For one cell
 const unsigned int LIFE_VOLTAGE_BREAKS[] = {2920, 3140, 3200, 3220, 3240, 3260, 3600}; //For one cell
 
+const unsigned int INITIAL_CELL_VOLTAGE_TOLERANCE = 50; // Tolerance added to the cell charged voltage
+
 const unsigned int ADC_READS_COUNT = 4; // Averaging readings to improve resolution
 const unsigned int CALIBRATION_VOLTAGE = 24000; // Voltage used for the calibration
 
@@ -200,7 +202,7 @@ uint8_t findCellCount(unsigned int voltage, unsigned int cellMin, unsigned int c
     if (i == 5 || i == 6)
       continue;
 
-    if (voltage > i*cellMin && voltage <= i*cellMax)
+    if (voltage > i * cellMin && voltage <= i * (cellMax + INITIAL_CELL_VOLTAGE_TOLERANCE))
       return i;
   }
 

@@ -25,7 +25,7 @@ Tom Magnier - 04/2018
 #include "KXKM_STM32_energy_API.h"
 
 // Firmware version
-const int FIRMWARE_VERSION = 1;
+const int FIRMWARE_VERSION = 2;
 
 // Hardware definitions
 const uint8_t LED_PINS[] = {4,3,2,1};
