@@ -7,6 +7,7 @@ The following features are tested :
   * LEDs 4-6 (selected by 3-way switch)
   * Load switch activation (displays current on the LED gauge)
   * Battery voltage measurement (display level on the LED gauge)
+  * Temperature measurement (display level on the LED gauge)
   * ESP32 activation and communication (send a string and expect to receive one.)
   * Self power cut
 
@@ -20,19 +21,43 @@ REMEMBER TO SET THE SUPPLY VOLTAGE TO 24V BEFORE SWITCHING TO THE BATT TEST !
 
 #include <AceButton.h>
 
-const uint8_t LED_PINS[] = {4,3,2,1};
-const uint8_t POWER_ENABLE_PIN = 12; //Self power enable. Keep HIGH to stay powered
-const uint8_t MAIN_OUT_ENABLE_PIN = 6; //Load switch enable line
-const uint8_t ESP32_ENABLE_PIN = 7; //ESP32 enable line
-const uint8_t PUSH_BUTTON_DETECT_PIN = 0; //Main On/off push button
-const uint8_t BATT_TYPE_SELECTOR_PINS[] = {10,11}; //3-way selector
-const uint8_t LOAD_CURRENT_SENSE_PIN = A0; //Load switch current measurement
-const uint8_t BATT_VOLTAGE_SENSE_PIN = A1; //Battery voltage measurement
-const uint8_t ESP32_TX_PIN = 8;
+#define HW_REVISION 2
 
-const uint8_t LED_ORDERING[] = {1,0,3,5,4,2};
+#if HW_REVISION == 1
+  const uint8_t LED_PINS[] = {4,3,2,1};
+  const uint8_t POWER_ENABLE_PIN = 12; //Self power enable. Keep HIGH to stay powered
+  const uint8_t MAIN_OUT_ENABLE_PIN = 6; //Load switch enable line
+  const uint8_t ESP32_ENABLE_PIN = 7; //ESP32 enable line
+  const uint8_t PUSH_BUTTON_DETECT_PIN = 0; //Main On/off push button
+  const uint8_t BATT_TYPE_SELECTOR_PINS[] = {10,11}; //3-way selector
+  const uint8_t LOAD_CURRENT_SENSE_PIN = 5; //Load switch current measurement
+  const uint8_t BATT_VOLTAGE_SENSE_PIN = 14; //Battery voltage measurement
+  const uint8_t ESP32_TX_PIN = 8;
 
-const uint8_t LOAD_SENSE_GAIN = 8;
+  const uint8_t LED_ORDERING[] = {1,0,3,5,4,2};
+
+  const uint8_t LOAD_SENSE_GAIN = 8;
+  
+#elif HW_REVISION == 2
+  const uint8_t LED_PINS[] = {3,2,0,1};
+  const uint8_t POWER_ENABLE_PIN = 12; //Self power enable. Keep HIGH to stay powered
+  const uint8_t MAIN_OUT_ENABLE_PIN = 6; //Load switch enable line
+  const uint8_t ESP32_ENABLE_PIN = 7; //ESP32 enable line
+  const uint8_t PUSH_BUTTON_DETECT_PIN = 13; //Main On/off push button
+  const uint8_t BATT_TYPE_SELECTOR_PINS[] = {10,11}; //3-way selector
+  const uint8_t LOAD_CURRENT_SENSE_PIN = 5; //Load switch current measurement
+  const uint8_t BATT_VOLTAGE_SENSE_PIN = 14; //Battery voltage measurement
+  const uint8_t ESP32_TX_PIN = 8;
+  const uint8_t TEMP_MEAS_PIN = 4; //Thermistor measurement
+
+  const uint8_t LED_ORDERING[] = {1,0,3,5,4,2};
+
+  const uint8_t LOAD_SENSE_GAIN = 8;
+
+#else
+  #error "HW_REVISION undefined or invalid. Should be 1 or 2"
+#endif
+
 
 const unsigned int ADC_READS_COUNT = 256; // Averaging readings to improve resolution
 const unsigned int ADC_AVG_CALIB = 16; // More average ! For calibration value
@@ -43,6 +68,7 @@ enum test_type_t {
   TEST_LED_2,
   TEST_LOAD_SW,
   TEST_BATT_MEAS,
+  TEST_TEMP_MEAS,
   TEST_ESP32,
   TEST_POWER_CUT
 } currentTestType;
@@ -62,6 +88,11 @@ void setup() {
     pinMode(BATT_TYPE_SELECTOR_PINS[i], INPUT_PULLUP);
 
   pinMode(ESP32_TX_PIN, INPUT); // Switch TX to High Z (shared with ESP32 programmation connector)
+  
+  #if HW_REVISION > 1
+  pinMode(TEMP_MEAS_PIN, OUTPUT);
+  digitalWrite(TEMP_MEAS_PIN, LOW); //Avoid thermistor self heating
+  #endif
 
   digitalWrite(POWER_ENABLE_PIN, HIGH); //Keep 3.3V regulator enabled
 
@@ -128,6 +159,13 @@ void loop() {
 
       break;
     }
+    
+    case TEST_TEMP_MEAS:
+    {
+      uint32_t voltage = analogRead(TEMP_MEAS_PIN);
+      setLed(voltage * 6 / 4095);
+      break;
+    }
 
     case TEST_ESP32:
       if (Serial1.available())
@@ -173,6 +211,12 @@ void beginTest(test_type_t test)
       digitalWrite(MAIN_OUT_ENABLE_PIN, HIGH);
       break;
 
+    #if HW_REVISION > 1
+    case TEST_TEMP_MEAS:
+      pinMode(TEMP_MEAS_PIN, INPUT);
+      break;
+    #endif
+    
     case TEST_ESP32:
       digitalWrite(ESP32_ENABLE_PIN, HIGH);
       break;
@@ -196,6 +240,14 @@ void endTest(test_type_t test)
     case TEST_LOAD_SW:
       digitalWrite(MAIN_OUT_ENABLE_PIN, LOW);
       break;
+      
+    #if HW_REVISION > 1
+    case TEST_TEMP_MEAS:
+      pinMode(TEMP_MEAS_PIN, OUTPUT);
+      digitalWrite(TEMP_MEAS_PIN, LOW); //Avoid thermistor self heating
+      break;
+    #endif
+
 
     case TEST_ESP32:
       digitalWrite(ESP32_ENABLE_PIN, LOW);
