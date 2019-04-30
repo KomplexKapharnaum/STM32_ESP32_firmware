@@ -23,43 +23,10 @@ Tom Magnier - 04/2018
 
 #include <AceButton.h>
 #include "KXKM_STM32_energy_API.h"
+#include "pin_mapping.h"
 
 // Firmware version
 const int FIRMWARE_VERSION = 2;
-
-// Hardware definitions
-#define HW_REVISION 2
-
-#if HW_REVISION == 1
-  const uint8_t LED_PINS[] = {4,3,2,1};
-  const uint8_t POWER_ENABLE_PIN = 12; //Self power enable. Keep HIGH to stay powered
-  const uint8_t MAIN_OUT_ENABLE_PIN = 6; //Load switch enable line
-  const uint8_t ESP32_ENABLE_PIN = 7; //ESP32 enable line
-  const uint8_t PUSH_BUTTON_DETECT_PIN = 0; //Main On/off push button
-  const uint8_t BATT_TYPE_SELECTOR_PINS[] = {10,11}; //3-way selector
-  const uint8_t LOAD_CURRENT_SENSE_PIN = 5; //Load switch current measurement
-  const uint8_t BATT_VOLTAGE_SENSE_PIN = 14; //Battery voltage measurement
-  const uint8_t ESP32_TX_PIN = 8;
-
-  const uint8_t LED_ORDERING[] = {1,0,3,5,4,2};
-  
-#elif HW_REVISION == 2
-  const uint8_t LED_PINS[] = {3,2,0,1};
-  const uint8_t POWER_ENABLE_PIN = 12; //Self power enable. Keep HIGH to stay powered
-  const uint8_t MAIN_OUT_ENABLE_PIN = 6; //Load switch enable line
-  const uint8_t ESP32_ENABLE_PIN = 7; //ESP32 enable line
-  const uint8_t PUSH_BUTTON_DETECT_PIN = 13; //Main On/off push button
-  const uint8_t BATT_TYPE_SELECTOR_PINS[] = {10,11}; //3-way selector
-  const uint8_t LOAD_CURRENT_SENSE_PIN = 5; //Load switch current measurement
-  const uint8_t BATT_VOLTAGE_SENSE_PIN = 14; //Battery voltage measurement
-  const uint8_t ESP32_TX_PIN = 8;
-  const uint8_t TEMP_MEAS_PIN = 4; //Thermistor measurement
-
-  const uint8_t LED_ORDERING[] = {1,0,3,5,4,2};
-
-#else
-  #error "HW_REVISION undefined or invalid. Should be 1 or 2"
-#endif
 
 // Timing configuration
 const unsigned long STARTUP_GUARD_TIME_MS = 5000; // Ignore long presses during this period after startup

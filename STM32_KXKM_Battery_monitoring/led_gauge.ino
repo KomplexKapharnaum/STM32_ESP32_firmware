@@ -6,8 +6,6 @@
  */
 
 const uint8_t LED_PWM_MAX_VAL = 4;
-const uint8_t LED_COUNT = 6;
-const uint8_t LED_PINS_COUNT = 4;
 
 volatile uint32_t _ledGaugeState; // LED state. Don't change directly ! Use the helper functions. Update should be atomic because the timer interrupt may trigger at any time.
 
