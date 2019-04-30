@@ -69,6 +69,9 @@ void setup()
   out->SetBitsPerSample(16);
   out->SetRate(44100);
 
+  // Wait for the 5V output (in case the DAC uses a low noise LDO)
+  delay(2000);  
+
   // PCM5141 start
   Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN); 
 
