@@ -26,7 +26,7 @@ all: build/$(ARDUINO_PROJECT).hex
 
 build/%.ino.hex: %.ino
 	mkdir -p $(BUILD_DIR)
-	$(ARDUINO_BUILDER) -compile -logger=machine -hardware $(ARDUINO_HARDWARE) -hardware $(PROJECT_HARDWARE_DIR) -tools $(ARDUINO_TOOLS_BUILDER) -tools $(ARDUINO_TOOLS_HARDWARE_AVR) -tools $(ARDUINO_PACKAGES_PATH) -built-in-libraries $(ARDUINO_LIBRARIES) -libraries $(BUILD_LIBRARIES) -fqbn=$(BOARD_ID) -ide-version=10808 -build-path $(BUILD_DIR) -warnings=none -prefs=build.warn_data_percentage=80 -verbose $<
+	$(ARDUINO_BUILDER) -compile -logger=humantags -hardware $(ARDUINO_HARDWARE) -hardware $(PROJECT_HARDWARE_DIR) -tools $(ARDUINO_TOOLS_BUILDER) -tools $(ARDUINO_TOOLS_HARDWARE_AVR) -tools $(ARDUINO_PACKAGES_PATH) -built-in-libraries $(ARDUINO_LIBRARIES) -libraries $(BUILD_LIBRARIES) -fqbn=$(BOARD_ID) -ide-version=10808 -build-path $(BUILD_DIR) -warnings=none -prefs=build.warn_data_percentage=80 $<
 
 test:
 	echo $(ARDUINO_BUILDER)
