@@ -4,8 +4,7 @@
 #include <Arduino.h>
 
 // Hardware definitions
-#define HW_REVISION 2
-
+// HW_REVISION is defined from the board variant (Hardware version menu in Arduino IDE)
 const uint8_t LED_PINS_COUNT = 4;
 const uint8_t LED_COUNT = 6;
 
