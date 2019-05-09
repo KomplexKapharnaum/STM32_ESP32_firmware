@@ -1,7 +1,7 @@
 # Initial file from https://github.com/boringplace/Arduino-builder/blob/master/Makefile
 # 
 # make all => builds the current firmware for all HW revisions
-# make flash HW_REV=v1  => flashes the built firmware for HW revision 1
+# make flash HW_REV=v1 BOARD_ID=4 => flashes the built firmware for HW revision 1, board ID 4
 # 
 # Dependencies : arduino with the STM32 core installed, JLinkExe
 
@@ -11,7 +11,7 @@ ARDUINO_PACKAGES_PATH = /home/tom/.arduino15/packages
 
 JLINK_EXECUTABLE = JLinkExe
 
-BOARD_ID = kxkm:stm32:KXKM_STM32F030:xserial=generic,opt=oslto,pnum=KXKM_F030F4
+BOARD_NAME = kxkm:stm32:KXKM_STM32F030:xserial=generic,opt=oslto,pnum=KXKM_F030F4
 JLINK_DEVICE_NAME = STM32F030F4
 PROJECT_HARDWARE_DIR := "$(CURDIR)/../hardware/"
 PROJECT_LIBRARIES := "$(CURDIR)/../libraries"
@@ -34,6 +34,9 @@ ARDUINO_BUILD_DIR := "$(CURDIR)/$(BUILD_DIR)/arduino"
 JLINK_TEMP_DIR := $(BUILD_DIR)/jlink
 JLINK_FLASH_SCRIPT := $(JLINK_TEMP_DIR)/flash_stm32_$(HW_REV).jlink
 
+# Convert board ID from decimal to hex 
+BOARD_ID_HEX := $(shell printf '%x' $(BOARD_ID))
+
 .PHONY: all
 all: v1 v2
 	
@@ -47,16 +50,20 @@ $(BUILD_DIR)/$(ARDUINO_PROJECT).%.hex: *.ino *.h
 	@echo ""
 	@echo "Compiling for $*"
 	@mkdir -p $(BUILD_DIR) $(ARDUINO_BUILD_DIR)
-	@$(ARDUINO_BUILDER) -compile -logger=humantags -hardware $(ARDUINO_HARDWARE) -hardware $(PROJECT_HARDWARE_DIR) -tools $(ARDUINO_TOOLS_BUILDER) -tools $(ARDUINO_TOOLS_HARDWARE_AVR) -tools $(ARDUINO_PACKAGES_PATH) -built-in-libraries $(ARDUINO_LIBRARIES) -libraries $(PROJECT_LIBRARIES) -fqbn=$(BOARD_ID),hw=$* -ide-version=10808 -build-path $(ARDUINO_BUILD_DIR) -warnings=none -prefs=build.warn_data_percentage=80 $(ARDUINO_PROJECT)
+	@$(ARDUINO_BUILDER) -compile -logger=humantags -hardware $(ARDUINO_HARDWARE) -hardware $(PROJECT_HARDWARE_DIR) -tools $(ARDUINO_TOOLS_BUILDER) -tools $(ARDUINO_TOOLS_HARDWARE_AVR) -tools $(ARDUINO_PACKAGES_PATH) -built-in-libraries $(ARDUINO_LIBRARIES) -libraries $(PROJECT_LIBRARIES) -fqbn=$(BOARD_NAME),hw=$* -ide-version=10808 -build-path $(ARDUINO_BUILD_DIR) -warnings=none -prefs=build.warn_data_percentage=80 $(ARDUINO_PROJECT)
 	@mv $(ARDUINO_BUILD_DIR)/$(ARDUINO_PROJECT).hex $@
 	
 flash:
 	@mkdir -p $(JLINK_TEMP_DIR)
-	echo "" > $(JLINK_FLASH_SCRIPT)
-	echo "loadfile \"$(BUILD_DIR)/$(ARDUINO_PROJECT).$(HW_REV).hex\"" >> $(JLINK_FLASH_SCRIPT)
+	@echo "" > $(JLINK_FLASH_SCRIPT)
+	@echo "Using hex file $(BUILD_DIR)/$(ARDUINO_PROJECT).$(HW_REV).hex"
+	@echo "loadfile \"$(BUILD_DIR)/$(ARDUINO_PROJECT).$(HW_REV).hex\"" >> $(JLINK_FLASH_SCRIPT)
+	@echo "Using board ID 0x$(BOARD_ID_HEX)"
+	@echo "w4 8003FFC, $(BOARD_ID_HEX)" >> $(JLINK_FLASH_SCRIPT) #Update the board ID in Flash
 	@echo "r" >> $(JLINK_FLASH_SCRIPT)
 	@echo "g" >> $(JLINK_FLASH_SCRIPT)
 	@echo "qc" >> $(JLINK_FLASH_SCRIPT)
+	@echo ""
 	@$(JLINK_EXECUTABLE) -device $(JLINK_DEVICE_NAME) -if SWD -speed 4000 -autoconnect 1 -CommanderScript $(JLINK_FLASH_SCRIPT)
 
 test:

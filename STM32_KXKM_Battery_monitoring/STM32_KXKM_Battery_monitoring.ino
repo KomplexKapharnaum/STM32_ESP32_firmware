@@ -24,6 +24,7 @@ Tom Magnier - 04/2018
 #include <AceButton.h>
 #include "KXKM_STM32_energy_API.h"
 #include "pin_mapping.h"
+#include "board_id.h"
 
 // Firmware version
 const int FIRMWARE_VERSION = 2;
@@ -84,6 +85,8 @@ void setup() {
   currentState = INIT;
 
   initLedGauge();
+  setSingleLed(BOARD_ID % 6, 1);
+  delay(1000);
 
   // Shut down immediately if the battery type could not be determined and the
   // selector is not in "Custom" position

@@ -15,6 +15,8 @@ Pour l'upload :
 * Serial interface : Generic interface
 * Optimize : Smallest (-Os) with LTO
 
+Choisir la version HW dans le menu "Hardware version" et mettre à jour l'ID de la carte dans `board_id.h`
+
 Choisir "Exporter les binaires compilées".
 
 Pour uploader, le sélecteur de type batterie doit être sur Custom. Maintenir le bouton ON/OFF appuyé pendant l'upload.
@@ -24,7 +26,7 @@ Mettre en place le câble TagConnect (à côté du sélecteur de type batterie) 
 Mettre à jour ARDUINO_PATH et ARDUINO_PACKAGES_PATH dans le Makefile puis exécuter `make` dans ce dossier.
 
 Pour uploader, le sélecteur de type batterie doit être sur Custom. Maintenir le bouton ON/OFF appuyé pendant l'upload.
-Mettre en place le câble TagConnect (à côté du sélecteur de type batterie) puis exécuter `make flash HW_REV=v1` ou `make flash HW_REV=v2`.
+Mettre en place le câble TagConnect (à côté du sélecteur de type batterie) puis exécuter `make flash HW_REV=[...] BOARD_ID=[...]`. `HW_REV` peut être égal à v1 ou v2.  
 
 
 ## Démarrage / extinction
