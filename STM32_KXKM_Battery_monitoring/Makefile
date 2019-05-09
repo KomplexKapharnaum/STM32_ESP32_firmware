@@ -4,8 +4,8 @@
 ARDUINO_PATH = /usr/share/arduino
 ARDUINO_PACKAGES_PATH = /home/tom/.arduino15/packages
 
-BOARD_ID = kxkm:stm32:KXKM_STM32F030:xserial=generic,opt=oslto,pnum=KXKM_F030F4
 PROJECT_HARDWARE_DIR = "$(CURDIR)/../hardware/"
+BOARD_ID = kxkm:stm32:KXKM_STM32F030:xserial=generic,opt=oslto,pnum=KXKM_F030F4,hw=v2
 
 ifeq ($(ARDUINO_PATH),)
 	$(error Arduino path not found)
