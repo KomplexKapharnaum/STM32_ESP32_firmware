@@ -1,12 +1,25 @@
 # STM32 - Monitoring batterie
 
 ## Compilation
-Dans les préférences Arduino ajouter https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json à la liste "URL de gestionnaire de cartes supplémentaires" puis installer STM32 Cores depuis le gestionnaire de carte (pour installer les outils, etc).
+### Prerequis
+* Arduino 
+* Dans les préférences Arduino ajouter https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json à la liste "URL de gestionnaire de cartes supplémentaires" 
+* Installer STM32 Cores depuis le gestionnaire de carte (pour installer les outils, etc).
 
-
+### Depuis Arduino
 * Type de carte : KXKM_STM32F030 (dans le 2e menu STM32)
 * Serial interface : Generic interface
 * Optimize : Smallest (-Os) with LTO
+
+Choisir "Exporter les binaires compilées"
+
+### Avec le Makefile
+Mettre à jour ARDUINO_PATH et ARDUINO_PACKAGES_PATH dans le Makefile puis exécuter `make` dans ce dossier.
+
+## Upload du code
+avec JLink + sonde Tag Connect
+Exécuter `JLinkExe -commanderscript STM32_flash.jlink` si le code est compilé depuis Arduino
+
 
 ## Démarrage / extinction
 Un appui long sur le bouton est nécessaire pour démarrer la carte. Un nouvel appui long déclenche l'extinction.
