@@ -1,5 +1,11 @@
 /* Send commands / receive answers */
 
+void flushSerialIn()
+{
+  while (Serial.available())
+    Serial.read();
+}
+
 void sendSerialCommand(KXKM_STM32_Energy::CommandType cmd, int arg)
 {
   flushSerialIn();
@@ -36,10 +42,4 @@ long readSerialAnswer()
     return arg;
   }
   return 0;
-}
-
-void flushSerialIn()
-{
-  while (Serial.available())
-    Serial.read();
 }
