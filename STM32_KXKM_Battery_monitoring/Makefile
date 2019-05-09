@@ -4,8 +4,8 @@
 ARDUINO_PATH = /usr/share/arduino
 ARDUINO_PACKAGES_PATH = /home/tom/.arduino15/packages
 
-PROJECT_HARDWARE_DIR = "$(CURDIR)/../hardware/"
 BOARD_ID = kxkm:stm32:KXKM_STM32F030:xserial=generic,opt=oslto,pnum=KXKM_F030F4,hw=v2
+PROJECT_HARDWARE_DIR := "$(CURDIR)/../hardware/"
 
 ifeq ($(ARDUINO_PATH),)
 	$(error Arduino path not found)
@@ -24,9 +24,9 @@ BUILD_LIBRARIES := "$(CURDIR)/../libraries"
 
 all: build/$(ARDUINO_PROJECT).hex
 
-build/%.ino.hex: %.ino
+build/%.ino.hex: *.ino *.h
 	mkdir -p $(BUILD_DIR)
-	$(ARDUINO_BUILDER) -compile -logger=humantags -hardware $(ARDUINO_HARDWARE) -hardware $(PROJECT_HARDWARE_DIR) -tools $(ARDUINO_TOOLS_BUILDER) -tools $(ARDUINO_TOOLS_HARDWARE_AVR) -tools $(ARDUINO_PACKAGES_PATH) -built-in-libraries $(ARDUINO_LIBRARIES) -libraries $(BUILD_LIBRARIES) -fqbn=$(BOARD_ID) -ide-version=10808 -build-path $(BUILD_DIR) -warnings=none -prefs=build.warn_data_percentage=80 $<
+	$(ARDUINO_BUILDER) -compile -logger=humantags -hardware $(ARDUINO_HARDWARE) -hardware $(PROJECT_HARDWARE_DIR) -tools $(ARDUINO_TOOLS_BUILDER) -tools $(ARDUINO_TOOLS_HARDWARE_AVR) -tools $(ARDUINO_PACKAGES_PATH) -built-in-libraries $(ARDUINO_LIBRARIES) -libraries $(BUILD_LIBRARIES) -fqbn=$(BOARD_ID) -ide-version=10808 -build-path $(BUILD_DIR) -warnings=none -prefs=build.warn_data_percentage=80 $(ARDUINO_PROJECT)
 
 test:
 	echo $(ARDUINO_BUILDER)
