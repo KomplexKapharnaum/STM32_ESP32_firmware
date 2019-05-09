@@ -1,24 +1,30 @@
 # STM32 - Monitoring batterie
 
-## Compilation
+## Compilation et upload
 ### Prerequis
 * Arduino 
 * Dans les préférences Arduino ajouter https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json à la liste "URL de gestionnaire de cartes supplémentaires" 
 * Installer STM32 Cores depuis le gestionnaire de carte (pour installer les outils, etc).
+
+Pour l'upload : 
+* une sonde JLink
+* un câble TagConnect TC2030-NL
 
 ### Depuis Arduino
 * Type de carte : KXKM_STM32F030 (dans le 2e menu STM32)
 * Serial interface : Generic interface
 * Optimize : Smallest (-Os) with LTO
 
-Choisir "Exporter les binaires compilées"
+Choisir "Exporter les binaires compilées".
+
+Pour uploader, le sélecteur de type batterie doit être sur Custom. Maintenir le bouton ON/OFF appuyé pendant l'upload.
+Mettre en place le câble TagConnect (à côté du sélecteur de type batterie) puis exécuter `JLinkExe -commanderscript STM32_flash.jlink`.
 
 ### Avec le Makefile
 Mettre à jour ARDUINO_PATH et ARDUINO_PACKAGES_PATH dans le Makefile puis exécuter `make` dans ce dossier.
 
-## Upload du code
-avec JLink + sonde Tag Connect
-Exécuter `JLinkExe -commanderscript STM32_flash.jlink` si le code est compilé depuis Arduino
+Pour uploader, le sélecteur de type batterie doit être sur Custom. Maintenir le bouton ON/OFF appuyé pendant l'upload.
+Mettre en place le câble TagConnect (à côté du sélecteur de type batterie) puis exécuter `make flash HW_REV=v1` ou `make flash HW_REV=v2`.
 
 
 ## Démarrage / extinction
