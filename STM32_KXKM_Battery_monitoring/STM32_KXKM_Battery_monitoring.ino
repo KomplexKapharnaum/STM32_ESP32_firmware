@@ -78,6 +78,7 @@ void setup() {
   buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureClick);
   buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureDoubleClick);
   buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureLongPress);
+  buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressClickBeforeDoubleClick);
 
   // To keep interactions consistent, a long press is required to start up the board.
   // If the MCU is still powered at the end of the delay, we can move along.
