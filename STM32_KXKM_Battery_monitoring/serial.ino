@@ -22,9 +22,9 @@ void beginSerial()
   GPIO_TypeDef *port;
   uint32_t function = (uint32_t)NC;
 
-  port = set_GPIO_Port_Clock(STM_PORT(digitalPinToPinName(PIN_SERIAL_TX)));
-  function = pinmap_function(digitalPinToPinName(PIN_SERIAL_TX), PinMap_UART_TX);
-  GPIO_InitStruct.Pin         = STM_GPIO_PIN(digitalPinToPinName(PIN_SERIAL_TX));
+  port = set_GPIO_Port_Clock(STM_PORT(digitalPinToPinName(ESP32_TX_PIN)));
+  function = pinmap_function(digitalPinToPinName(ESP32_TX_PIN), PinMap_UART_TX);
+  GPIO_InitStruct.Pin         = STM_GPIO_PIN(digitalPinToPinName(ESP32_TX_PIN));
   GPIO_InitStruct.Mode        = STM_PIN_MODE(function);
   GPIO_InitStruct.Speed       = GPIO_SPEED_FREQ_HIGH;
   GPIO_InitStruct.Pull        = STM_PIN_PUPD(function);
@@ -35,7 +35,7 @@ void beginSerial()
 void endSerial()
 {
   Serial1.flush();
-  pinMode(ESP32_TX_PIN, INPUT); //Set TX pin to Hi Z to allow ESP32 programmation from external connector
+  pinMode(ESP32_TX_PIN, INPUT_PULLUP); //Set TX pin to Hi Z to allow ESP32 programmation from external connector
 }
 
 void serialEvent1()
