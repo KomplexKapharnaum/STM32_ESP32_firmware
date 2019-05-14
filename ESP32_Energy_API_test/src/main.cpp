@@ -7,14 +7,14 @@ Battery voltage and percentage are queried every 2s.
 The following features are tested :
   * setting LEDs independently
   * using the LED gauge to display a percentage
-  * enabling / disabling the load switch (if the user push button is pressed at startup the load switch is not enabled automatically)
+  * enabling / disabling the load switch (the load switch is explicitly disabled at startup)
   * setting custom batt characteristics (12-14V)
   * Starting a critical section with a 8s timeout
-    * Leaving the critical section (main push button)
-    * requesting a shutdown (user push button)
+    * Leaving the critical section (click)
+    * requesting a shutdown (double click)
   * Request a self reset
 
-The main push button is used to cycle through the tests on double clicks (via STM32 serial).
+The main push button is used to cycle through the tests on clicks (via STM32 serial).
 
 Connect with telnet to get the debug information 
 */
@@ -56,12 +56,18 @@ void endTest(test_type_t test);
 void setup() {
   Serial.begin(115200, SERIAL_8N1);
   Serial.setTimeout(10);
+
+  //Disable the load switch immediately
+  debugI("Disabling load switch.");
+  sendSerialCommand(KXKM_STM32_Energy::SET_LOAD_SWITCH, 0);
   
   WiFi.begin(ssid, password);
 
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+    static int ledId = 0;
+    setSingleLed(ledId++ % 6);
+    delay(300);
   }
 
   // Register host name in WiFi and mDNS
@@ -125,12 +131,35 @@ void loop() {
     lastButtonCheck = millis();
     sendSerialCommand(KXKM_STM32_Energy::GET_BUTTON_EVENT);
 
-    if (readSerialAnswer() == KXKM_STM32_Energy::BUTTON_CLICK_EVENT)
+    int buttonEvent = readSerialAnswer();
+    if (buttonEvent == KXKM_STM32_Energy::BUTTON_CLICK_EVENT)
     {
       debugI("Main button clicked.");
       endTest(currentTestType);
       currentTestType = (test_type_t)((int)currentTestType + 1);
       beginTest(currentTestType);
+    }
+    else if (buttonEvent == KXKM_STM32_Energy::BUTTON_DOUBLE_CLICK_EVENT)
+    {
+      debugI("Main button double clicked.");
+      switch (currentTestType)
+      {
+        case TEST_ENTER_CRITICAL_SECTION:
+        case TEST_LEAVE_CRITICAL_SECTION:
+        {
+          debugI("Shutting down...");
+          unsigned int currentTime = millis();
+          while (millis() - currentTime < 1000)
+          {
+            Debug.handle();          
+          }
+          sendSerialCommand(KXKM_STM32_Energy::SHUTDOWN);
+          break;
+        }
+
+        default:
+          break;
+      }
     }
   }
 

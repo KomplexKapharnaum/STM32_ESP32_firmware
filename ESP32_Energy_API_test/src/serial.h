@@ -34,6 +34,11 @@ void setLeds(uint8_t *values)
   sendSerialCommand(KXKM_STM32_Energy::SET_LEDS, arg);
 }
 
+void setSingleLed(uint8_t index)
+{
+  sendSerialCommand(KXKM_STM32_Energy::SET_LEDS, 4 * pow(10, index));
+}
+
 long readSerialAnswer()
 {
   if (Serial.find(KXKM_STM32_Energy::PREAMBLE))
