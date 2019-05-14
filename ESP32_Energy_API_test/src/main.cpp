@@ -14,6 +14,8 @@ The following features are tested :
     * requesting a shutdown (double click)
   * Request a self reset
 
+To test the critical section, it should be done by setting the voltage under 12V.
+
 The main push button is used to cycle through the tests on clicks (via STM32 serial).
 
 Connect with telnet to get the debug information 
