@@ -69,3 +69,7 @@ flash:
 test:
 	echo $(ARDUINO_BUILDER)
 	echo $(ARDUINO_PATH)
+
+.PHONY: clean
+clean:
+	@rm -r  $(BUILD_DIR) 
