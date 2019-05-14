@@ -95,7 +95,7 @@ void serialEvent1()
         break;
 
       case KXKM_STM32_Energy::GET_BATTERY_TYPE:
-        sendAnswer(getBatteryTypeSelectorState());
+        sendAnswer(_battType);
         break;
       
       case KXKM_STM32_Energy::GET_LOAD_CURRENT:
@@ -147,7 +147,7 @@ void serialEvent1()
       case KXKM_STM32_Energy::SET_BATTERY_VOLTAGE_5:
       case KXKM_STM32_Energy::SET_BATTERY_VOLTAGE_6:
         //Accept custom batt characteristics only if the selector is on "Custom" position
-        if (getBatteryTypeSelectorState() == KXKM_STM32_Energy::BATTERY_CUSTOM)
+        if (_battType == KXKM_STM32_Energy::BATTERY_CUSTOM)
           _battVoltageBreaks[cmd - KXKM_STM32_Energy::SET_BATTERY_VOLTAGE_LOW] = arg;
         break;
 

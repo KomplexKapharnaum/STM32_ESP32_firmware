@@ -41,6 +41,7 @@ const unsigned int ADC_NEW_WEIGHT = 3;
 
 unsigned int _battVoltageBreaks[7];
 unsigned int _avgBattVoltage;
+KXKM_STM32_Energy::BatteryType _battType;
 
 /* Initialize battery monitoring resources and determine the type and voltage of
  the attached battery.
@@ -53,8 +54,10 @@ bool initBatteryMonitoring()
   analogReadResolution(12);
 
   _avgBattVoltage = readBatteryVoltage();
+  
+  _battType = getBatteryTypeSelectorState();
 
-  switch (getBatteryTypeSelectorState())
+  switch (_battType)
   {
     case KXKM_STM32_Energy::BATTERY_LIPO: //LiPo
     {
