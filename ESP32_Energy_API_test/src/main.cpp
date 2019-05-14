@@ -83,6 +83,12 @@ void beginTesting() {
   debugI("Beginning Energy API test sketch.");
 
   currentTestType = INIT;
+  
+  sendSerialCommand(KXKM_STM32_Energy::GET_HW_REVISION);
+  debugI("Hardware revision : %d", readSerialAnswer());
+  
+  sendSerialCommand(KXKM_STM32_Energy::GET_BOARD_ID);
+  debugI("Board ID : %d", readSerialAnswer());
 
   sendSerialCommand(KXKM_STM32_Energy::GET_API_VERSION);
   debugI("STM32 API version : %d", readSerialAnswer());

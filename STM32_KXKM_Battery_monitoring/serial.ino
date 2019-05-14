@@ -70,6 +70,14 @@ void serialEvent1()
 
     switch (cmd)
     {
+      case KXKM_STM32_Energy::GET_HW_REVISION:
+        sendAnswer(HW_REVISION);
+        break;
+        
+      case KXKM_STM32_Energy::GET_BOARD_ID:
+        sendAnswer(BOARD_ID);
+        break;
+        
       case KXKM_STM32_Energy::GET_API_VERSION:
         sendAnswer(KXKM_STM32_Energy::API_VERSION);
         break;
@@ -88,6 +96,14 @@ void serialEvent1()
 
       case KXKM_STM32_Energy::GET_BATTERY_TYPE:
         sendAnswer(getBatteryTypeSelectorState());
+        break;
+      
+      case KXKM_STM32_Energy::GET_LOAD_CURRENT:
+        sendAnswer(-1); //TODO not implemented
+        break;
+      
+      case KXKM_STM32_Energy::GET_TEMPERATURE:
+        sendAnswer(-1); //TODO not implemented
         break;
 
       case KXKM_STM32_Energy::SET_LEDS:

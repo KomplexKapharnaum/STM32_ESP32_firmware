@@ -18,10 +18,20 @@ public:
   static constexpr char* PREAMBLE = "### ";
 
   /* API Version */
-  static constexpr uint8_t API_VERSION = 1;
+  static constexpr uint8_t API_VERSION = 2;
 
   /* Command types (main processor > STM32) */
   enum CommandType {
+    /* Get hardware revision.
+       No argument.
+       The STM32 will answer with the board revision number. */
+    GET_HW_REVISION = 'H',
+
+    /* Get board ID.
+       No argument.
+       The STM32 will answer with the board ID. */
+    GET_BOARD_ID = 'I',
+
     /* Get API version.
        No argument.
        The STM32 will answer with its own API version. */
@@ -46,6 +56,16 @@ public:
        No argument.
        See enum BatteryType for the possible answers from the STM32. */
     GET_BATTERY_TYPE = 'T',
+    
+    /* Get load switch current.
+       No argument.
+       The STM32 will answer with the approximate current in mA. */
+    GET_LOAD_CURRENT = 'C',
+    
+    /* Get temperature.
+       No argument.
+       The STM32 will answer with the approximate board temperature in deg. C */
+    GET_TEMPERATURE = 'O',
 
     /* Set the LEDs independently.
        Argument : for each LED a number between 0 (Off) and 4 (On). Missing LEDs will be treated as 0.
@@ -60,10 +80,10 @@ public:
 
     /* Enable / disable main power switch. Default behavior is to switch it on 2s after startup.
        Send a disable command before to cancel this behavior.
-       Argument : 1 to enable outputnamespace, 0 to disable.
+       Argument : 1 to enable output, 0 to disable.
        No answer from the STM32. */
     SET_LOAD_SWITCH = 'P',
-
+    
     /* Shutdown the whole board.
        No argument.
        No answer from the STM32. */

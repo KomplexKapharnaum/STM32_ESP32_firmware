@@ -85,8 +85,6 @@ void setup() {
   currentState = INIT;
 
   initLedGauge();
-  setSingleLed(BOARD_ID % 6, 1);
-  delay(1000);
 
   // Shut down immediately if the battery type could not be determined and the
   // selector is not in "Custom" position
