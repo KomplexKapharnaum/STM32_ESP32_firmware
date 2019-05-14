@@ -32,6 +32,7 @@ const int FIRMWARE_VERSION = 2;
 // Timing configuration
 const unsigned long STARTUP_GUARD_TIME_MS = 5000; // Ignore long presses during this period after startup
 const unsigned long BATT_DISPLAY_TIME_MS = 3000; // Display the battery level during this time then shut down the LEDs
+const unsigned long BATT_DISPLAY_DELAY_MS = 300; // Display the battery level after this delay when the button is pushed.
 const unsigned long LOAD_SWITCH_START_DELAY_MS = 2000; // Start the load switch after this delay (to allow the ESP32 to disable the load switch if needed)
 const unsigned long MAX_CRITICAL_SECTION_DURATION_MS = 10000; // Maximum critical section duration.
 const unsigned long CUSTOM_LED_DISPLAY_TIME_MS = 2000; // Display the custom LED display during this period (set by serial API)
@@ -168,8 +169,12 @@ void loop()
 void handleButtonEvent(ace_button::AceButton* button, uint8_t eventType, uint8_t buttonState) {
   switch (eventType) {
     case ace_button::AceButton::kEventClicked:
-      //Display the battery percentage on the LED gauge
-      battLevelDisplayStartTime = millis();
+      //Display the battery percentage on the LED gauge. Leave some time for the ESP32 to override the default behavior if needed.
+      if (battLevelDisplayStartTime + BATT_DISPLAY_TIME_MS > millis())
+        battLevelDisplayStartTime = millis();
+      else 
+        battLevelDisplayStartTime = millis() + BATT_DISPLAY_DELAY_MS;
+      
       buttonEvent = KXKM_STM32_Energy::BUTTON_CLICK_EVENT;
       break;
 

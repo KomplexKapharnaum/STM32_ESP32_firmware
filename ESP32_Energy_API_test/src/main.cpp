@@ -125,9 +125,9 @@ void loop() {
     lastButtonCheck = millis();
     sendSerialCommand(KXKM_STM32_Energy::GET_BUTTON_EVENT);
 
-    if (readSerialAnswer() == KXKM_STM32_Energy::BUTTON_DOUBLE_CLICK_EVENT)
+    if (readSerialAnswer() == KXKM_STM32_Energy::BUTTON_CLICK_EVENT)
     {
-      debugI("Main button double clicked.");
+      debugI("Main button clicked.");
       endTest(currentTestType);
       currentTestType = (test_type_t)((int)currentTestType + 1);
       beginTest(currentTestType);
