@@ -103,7 +103,7 @@ void serialEvent1()
         break;
       
       case KXKM_STM32_Energy::GET_TEMPERATURE:
-        sendAnswer(-1); //TODO not implemented
+        sendAnswer(readApproxTempDegC());
         break;
 
       case KXKM_STM32_Energy::SET_LEDS:

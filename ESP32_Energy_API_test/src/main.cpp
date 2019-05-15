@@ -2,7 +2,7 @@
 KXKM - ESP32 audio & battery module
 STM32 Energy API test from ESP32
 
-Battery voltage and percentage ; load current are queried every 2s.
+Battery voltage and percentage ; load current ; board temperature are queried every 2s.
 
 The following features are tested :
   * setting LEDs independently
@@ -128,6 +128,9 @@ void loop() {
     
     sendSerialCommand(KXKM_STM32_Energy::GET_LOAD_CURRENT);
     debugI("Load current : %d mA", readSerialAnswer());
+    
+    sendSerialCommand(KXKM_STM32_Energy::GET_TEMPERATURE);
+    debugI("Board temperature : %d deg. C", readSerialAnswer());
   }
 
   if (millis() - lastButtonCheck > BUTTON_CHECK_PERIOD_MS)

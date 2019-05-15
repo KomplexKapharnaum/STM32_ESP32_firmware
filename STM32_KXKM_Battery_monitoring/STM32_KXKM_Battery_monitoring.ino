@@ -25,6 +25,7 @@ Tom Magnier - 04/2018
 #include "KXKM_STM32_energy_API.h"
 #include "pin_mapping.h"
 #include "board_id.h"
+#include "AdcToTemperature.h"
 
 // Firmware version
 const int FIRMWARE_VERSION = 2;
@@ -65,6 +66,11 @@ void setup() {
   pinMode(ESP32_ENABLE_PIN, OUTPUT);
   pinMode(MAIN_OUT_ENABLE_PIN, OUTPUT);
   pinMode(PUSH_BUTTON_DETECT_PIN, INPUT);
+  
+  #if HW_REVISION > 1
+    pinMode(TEMP_MEAS_PIN, OUTPUT);
+    digitalWrite(TEMP_MEAS_PIN, LOW); // Avoid thermistor self heating
+  #endif
 
   setESP32State(false); //Force reset if necesary
 

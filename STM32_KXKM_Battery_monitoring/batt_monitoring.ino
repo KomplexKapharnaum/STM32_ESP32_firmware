@@ -169,6 +169,29 @@ unsigned int readLoadCurrent()
   return adcRead * CURRENT_MEAS_MULTIPLIER1 / CURRENT_MEAS_DIVIDER * CURRENT_MEAS_MULTIPLIER2;
 }
 
+/* Return the approximate temperature in degree Celsius from the on-board thermistor.
+ * Not supported on hardware revision 1.
+ */
+int readApproxTempDegC()
+{
+  #if HW_REVISION == 1
+    return 25;
+  #else
+    pinMode(TEMP_MEAS_PIN, INPUT);
+    delayMicroseconds(10);
+
+    unsigned long adcRead = 0;
+    for (int i = 0; i < ADC_READS_COUNT; i++)
+      adcRead += analogRead(TEMP_MEAS_PIN);
+    adcRead /= ADC_READS_COUNT;
+    
+    pinMode(TEMP_MEAS_PIN, OUTPUT);
+    digitalWrite(TEMP_MEAS_PIN, LOW); // Avoid thermistor self heating
+    
+    return approximateTemperatureInt(adcRead);
+  #endif
+}
+
 /* Return the battery percentage using the average reading.
    At least the low and high voltage breaks are required.
 
