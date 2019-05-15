@@ -35,7 +35,6 @@ const unsigned long BATTERY_CHECK_PERIOD_MS = 2000;
 const unsigned long BUTTON_CHECK_PERIOD_MS = 200;
 
 enum test_type_t {
-  STARTUP,
   INIT,
   TEST_LED_1,
   TEST_LED_2,
@@ -81,17 +80,13 @@ void setup() {
   Debug.setResetCmdEnabled(true); // Enable the reset command
   Debug.showProfiler(true); // Profiler (Good to measure times, to optimize codes)
   Debug.showColors(true); // Colors
-  Debug.setHelpProjectsCmds("begin to begin tests. Then use the button to cycle through the tests");
+  Debug.setHelpProjectsCmds("info to print board & FW info");
   Debug.setCallBackProjectCmds(&processCmdRemoteDebug);
 
-  currentTestType = STARTUP;
+  currentTestType = INIT;
 }
 
-void beginTesting() {
-  debugI("Beginning Energy API test sketch.");
-
-  currentTestType = INIT;
-  
+void printInfo() {
   sendSerialCommand(KXKM_STM32_Energy::GET_HW_REVISION);
   debugI("Hardware revision : %d", readSerialAnswer());
   
@@ -120,6 +115,8 @@ void loop() {
   if (millis() - lastBatteryCheck > BATTERY_CHECK_PERIOD_MS)
   {
     lastBatteryCheck = millis();
+    debugI("--------------------------------------------");
+    
     sendSerialCommand(KXKM_STM32_Energy::GET_BATTERY_VOLTAGE);
     debugI("Batt voltage : %d mV", readSerialAnswer());
 
@@ -206,6 +203,20 @@ void loop() {
       }
       break;
     }
+    
+    case TEST_LOAD_SW:
+    {
+      static unsigned long ledUpdateTime = millis();
+      if (millis() - ledUpdateTime > 50)
+      {
+        ledUpdateTime = millis();
+        sendSerialCommand(KXKM_STM32_Energy::GET_LOAD_CURRENT);
+        int percentage = readSerialAnswer() * 100 / 3500; //Max test current : 3500mA
+        
+        sendSerialCommand(KXKM_STM32_Energy::SET_LED_GAUGE, percentage);
+      }
+      break;
+    }
 
     default:
       break;
@@ -267,7 +278,7 @@ void endTest(test_type_t test)
 void processCmdRemoteDebug() {
 	String lastCmd = Debug.getLastCommand();
 
-	if (lastCmd == "begin") {
-    beginTesting();
+	if (lastCmd == "info") {
+    printInfo();
 	}
 }
