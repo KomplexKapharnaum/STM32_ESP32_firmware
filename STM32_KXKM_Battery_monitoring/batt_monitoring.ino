@@ -31,13 +31,17 @@ const unsigned int INITIAL_CELL_VOLTAGE_TOLERANCE = 50; // Tolerance added to th
 const unsigned int ADC_READS_COUNT = 4; // Averaging readings to improve resolution
 const unsigned int CALIBRATION_VOLTAGE = 24000; // Voltage used for the calibration
 
-const unsigned long ADC_READ_PERIOD_MS = 5; // ADC read every 10ms
+const unsigned long ADC_READ_PERIOD_MS = 5; // ADC read every 5ms
 
 const int BATT_LOW_LEVEL = 10; // Low battery level (%)
 
-//ADC reading : exponential averaging
-const unsigned int ADC_OLD_WEIGHT = 97;
-const unsigned int ADC_NEW_WEIGHT = 3;
+// ADC reading : exponential averaging
+// Time constant (samples) =  -1 / ln(OLD_WEIGHT/(OLD_WEIGHT+NEW_WEIGHT))
+// Time constant (seconds) =  - ADC_READ_PERIOD_MS / 1000 * ln(OLD_WEIGHT/(OLD_WEIGHT+NEW_WEIGHT))
+const unsigned int VOLTAGE_OLD_WEIGHT = 999; //Time constant : around 5s
+const unsigned int VOLTAGE_NEW_WEIGHT = 1;
+const unsigned int CURRENT_OLD_WEIGHT = 95; //Time constant : around 0.1s
+const unsigned int CURRENT_NEW_WEIGHT = 5;
 
 //Load switch current reading : V (mV) = R (ohm) * I_load (mA) / 10000
 #if HW_REVISION == 1
@@ -50,6 +54,9 @@ const unsigned long CURRENT_MEAS_MULTIPLIER1 = 3300 * 100;
 const unsigned long CURRENT_MEAS_DIVIDER =  (4095 * CURRENT_MEAS_RESISTOR);
 const unsigned long CURRENT_MEAS_MULTIPLIER2 = 100;
 
+//Increase fixed point precision to allow longer time constants.
+const unsigned int VOLTAGE_MEAS_DECIMAL_PART = 5; // 2^5
+const unsigned int CURRENT_MEAS_DECIMAL_PART = 5; // 2^5
 
 unsigned int _battVoltageBreaks[7];
 unsigned int _avgBattVoltage;
@@ -75,7 +82,7 @@ bool initBatteryMonitoring()
   {
     case KXKM_STM32_Energy::BATTERY_LIPO: //LiPo
     {
-      uint8_t cells = findCellCount(_avgBattVoltage, LIPO_VOLTAGE_BREAKS[0], LIPO_VOLTAGE_BREAKS[6]);
+      uint8_t cells = findCellCount(getAverageBatteryVoltage(), LIPO_VOLTAGE_BREAKS[0], LIPO_VOLTAGE_BREAKS[6]);
 
       //SERIAL_DEBUG("LiPo");
       //SERIAL_DEBUG(cells);
@@ -91,7 +98,7 @@ bool initBatteryMonitoring()
 
     case KXKM_STM32_Energy::BATTERY_LIFE: //LiFe
     {
-      uint8_t cells = findCellCount(_avgBattVoltage, LIFE_VOLTAGE_BREAKS[0], LIFE_VOLTAGE_BREAKS[6]);
+      uint8_t cells = findCellCount(getAverageBatteryVoltage(), LIFE_VOLTAGE_BREAKS[0], LIFE_VOLTAGE_BREAKS[6]);
 
       //SERIAL_DEBUG("LiFe");
       //SERIAL_DEBUG(cells);
@@ -122,8 +129,10 @@ void loopBatteryMonitoring()
   if (millis() - lastAdcRead > ADC_READ_PERIOD_MS)
   {
     lastAdcRead = millis();
-    _avgBattVoltage = (_avgBattVoltage * ADC_OLD_WEIGHT + readBatteryVoltage() * ADC_NEW_WEIGHT) / (ADC_OLD_WEIGHT + ADC_NEW_WEIGHT);
-    _avgLoadCurrent = (_avgLoadCurrent * ADC_OLD_WEIGHT + readLoadCurrent() * ADC_NEW_WEIGHT) / (ADC_OLD_WEIGHT + ADC_NEW_WEIGHT);
+    
+    //Exponential smoothing
+    _avgBattVoltage = (_avgBattVoltage * VOLTAGE_OLD_WEIGHT + readBatteryVoltage() * VOLTAGE_NEW_WEIGHT) / (VOLTAGE_OLD_WEIGHT + VOLTAGE_NEW_WEIGHT);
+    _avgLoadCurrent = (_avgLoadCurrent * CURRENT_OLD_WEIGHT + readLoadCurrent() * CURRENT_NEW_WEIGHT) / (CURRENT_OLD_WEIGHT + CURRENT_NEW_WEIGHT);
 
     // SERIAL_DEBUG(_avgBattVoltage);
   }
@@ -146,7 +155,13 @@ unsigned int readBatteryVoltage()
   // SERIAL_DEBUG(adcRead);
   // SERIAL_DEBUG(millisEnd - millisStart);
 
-  return adcRead * CALIBRATION_VOLTAGE / readCalibrationValue();
+  return (adcRead << VOLTAGE_MEAS_DECIMAL_PART) * CALIBRATION_VOLTAGE / readCalibrationValue();
+}
+
+/* Return the average battery voltage */
+unsigned int getAverageBatteryVoltage()
+{
+  return _avgBattVoltage >> VOLTAGE_MEAS_DECIMAL_PART;
 }
 
 /* Take a load current measurement and return the result in mA */
@@ -166,7 +181,13 @@ unsigned int readLoadCurrent()
   // SERIAL_DEBUG(adcRead);
   // SERIAL_DEBUG(millisEnd - millisStart);
 
-  return adcRead * CURRENT_MEAS_MULTIPLIER1 / CURRENT_MEAS_DIVIDER * CURRENT_MEAS_MULTIPLIER2;
+  return (adcRead * CURRENT_MEAS_MULTIPLIER1 / CURRENT_MEAS_DIVIDER * CURRENT_MEAS_MULTIPLIER2) << CURRENT_MEAS_DECIMAL_PART;
+}
+
+/* Return the average load current */
+unsigned int getAverageLoadCurrent()
+{
+  return _avgLoadCurrent >> CURRENT_MEAS_DECIMAL_PART;
 }
 
 /* Return the approximate temperature in degree Celsius from the on-board thermistor.
@@ -202,10 +223,10 @@ int getBatteryPercentage()
   if (_battVoltageBreaks[0] == 0 || _battVoltageBreaks[6] == 0)
     return -1;
 
-  if (_avgBattVoltage < _battVoltageBreaks[0])
+  if (getAverageBatteryVoltage() < _battVoltageBreaks[0])
     return 0;
 
-  if (_avgBattVoltage >= _battVoltageBreaks[6])
+  if (getAverageBatteryVoltage() >= _battVoltageBreaks[6])
     return 100;
 
   // Find out the first defined voltage break above 0 and interpolate between break 0 and this break.
@@ -217,8 +238,9 @@ int getBatteryPercentage()
     while (_battVoltageBreaks[upperIdx] == 0 && upperIdx <= 6)
       upperIdx++;
 
-    if (_avgBattVoltage >= _battVoltageBreaks[lowerIdx] && _avgBattVoltage < _battVoltageBreaks[upperIdx])
-      return (lowerIdx * 100 / 6) + (_avgBattVoltage - _battVoltageBreaks[lowerIdx]) * (upperIdx - lowerIdx) * (100 / 6) / (_battVoltageBreaks[upperIdx] - _battVoltageBreaks[lowerIdx]);
+    unsigned int battVoltage = getAverageBatteryVoltage();
+    if (battVoltage >= _battVoltageBreaks[lowerIdx] && battVoltage < _battVoltageBreaks[upperIdx])
+      return (lowerIdx * 100 / 6) + (battVoltage - _battVoltageBreaks[lowerIdx]) * (upperIdx - lowerIdx) * (100 / 6) / (_battVoltageBreaks[upperIdx] - _battVoltageBreaks[lowerIdx]);
 
     lowerIdx = upperIdx;
   }

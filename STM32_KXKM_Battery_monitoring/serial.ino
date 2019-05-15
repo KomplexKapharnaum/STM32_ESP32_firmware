@@ -87,7 +87,7 @@ void serialEvent1()
         break;
 
       case KXKM_STM32_Energy::GET_BATTERY_VOLTAGE:
-        sendAnswer(_avgBattVoltage);
+        sendAnswer(getAverageBatteryVoltage());
         break;
 
       case KXKM_STM32_Energy::GET_BATTERY_PERCENTAGE:
@@ -99,7 +99,7 @@ void serialEvent1()
         break;
       
       case KXKM_STM32_Energy::GET_LOAD_CURRENT:
-        sendAnswer(_avgLoadCurrent);
+        sendAnswer(getAverageLoadCurrent());
         break;
       
       case KXKM_STM32_Energy::GET_TEMPERATURE:
