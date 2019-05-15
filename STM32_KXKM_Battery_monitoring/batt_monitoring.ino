@@ -39,8 +39,21 @@ const int BATT_LOW_LEVEL = 10; // Low battery level (%)
 const unsigned int ADC_OLD_WEIGHT = 97;
 const unsigned int ADC_NEW_WEIGHT = 3;
 
+//Load switch current reading : V (mV) = R (ohm) * I_load (mA) / 10000
+#if HW_REVISION == 1
+  const unsigned long CURRENT_MEAS_RESISTOR = 470;
+#elif HW_REVISION == 2
+  const unsigned long CURRENT_MEAS_RESISTOR = 2000;
+#endif
+// Multiplier is split in two to avoid overflow.
+const unsigned long CURRENT_MEAS_MULTIPLIER1 = 3300 * 100;
+const unsigned long CURRENT_MEAS_DIVIDER =  (4095 * CURRENT_MEAS_RESISTOR);
+const unsigned long CURRENT_MEAS_MULTIPLIER2 = 100;
+
+
 unsigned int _battVoltageBreaks[7];
 unsigned int _avgBattVoltage;
+unsigned int _avgLoadCurrent;
 KXKM_STM32_Energy::BatteryType _battType;
 
 /* Initialize battery monitoring resources and determine the type and voltage of
@@ -54,6 +67,7 @@ bool initBatteryMonitoring()
   analogReadResolution(12);
 
   _avgBattVoltage = readBatteryVoltage();
+  _avgLoadCurrent = readLoadCurrent();
   
   _battType = getBatteryTypeSelectorState();
 
@@ -109,6 +123,7 @@ void loopBatteryMonitoring()
   {
     lastAdcRead = millis();
     _avgBattVoltage = (_avgBattVoltage * ADC_OLD_WEIGHT + readBatteryVoltage() * ADC_NEW_WEIGHT) / (ADC_OLD_WEIGHT + ADC_NEW_WEIGHT);
+    _avgLoadCurrent = (_avgLoadCurrent * ADC_OLD_WEIGHT + readLoadCurrent() * ADC_NEW_WEIGHT) / (ADC_OLD_WEIGHT + ADC_NEW_WEIGHT);
 
     // SERIAL_DEBUG(_avgBattVoltage);
   }
@@ -132,6 +147,26 @@ unsigned int readBatteryVoltage()
   // SERIAL_DEBUG(millisEnd - millisStart);
 
   return adcRead * CALIBRATION_VOLTAGE / readCalibrationValue();
+}
+
+/* Take a load current measurement and return the result in mA */
+unsigned int readLoadCurrent()
+{
+  unsigned long adcRead = 0;
+
+  // unsigned long millisStart = millis();
+
+  for (int i = 0; i < ADC_READS_COUNT; i++)
+    adcRead += analogRead(LOAD_CURRENT_SENSE_PIN);
+
+  adcRead /= ADC_READS_COUNT;
+
+  // unsigned long millisEnd = millis();
+
+  // SERIAL_DEBUG(adcRead);
+  // SERIAL_DEBUG(millisEnd - millisStart);
+
+  return adcRead * CURRENT_MEAS_MULTIPLIER1 / CURRENT_MEAS_DIVIDER * CURRENT_MEAS_MULTIPLIER2;
 }
 
 /* Return the battery percentage using the average reading.

@@ -99,7 +99,7 @@ void serialEvent1()
         break;
       
       case KXKM_STM32_Energy::GET_LOAD_CURRENT:
-        sendAnswer(-1); //TODO not implemented
+        sendAnswer(_avgLoadCurrent);
         break;
       
       case KXKM_STM32_Energy::GET_TEMPERATURE:
