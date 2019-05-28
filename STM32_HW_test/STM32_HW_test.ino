@@ -52,7 +52,7 @@ REMEMBER TO SET THE SUPPLY VOLTAGE TO 24V BEFORE SWITCHING TO THE BATT TEST !
 
   const uint8_t LED_ORDERING[] = {1,0,3,5,4,2};
 
-  const uint8_t LOAD_SENSE_GAIN = 8;
+  const uint8_t LOAD_SENSE_GAIN = 16;
 
 #else
   #error "HW_REVISION undefined or invalid. Should be 1 or 2"
