@@ -38,10 +38,10 @@ const int BATT_LOW_LEVEL = 10; // Low battery level (%)
 // ADC reading : exponential averaging
 // Time constant (samples) =  -1 / ln(OLD_WEIGHT/(OLD_WEIGHT+NEW_WEIGHT))
 // Time constant (seconds) =  - ADC_READ_PERIOD_MS / 1000 * ln(OLD_WEIGHT/(OLD_WEIGHT+NEW_WEIGHT))
-const unsigned int VOLTAGE_OLD_WEIGHT = 999; //Time constant : around 5s
-const unsigned int VOLTAGE_NEW_WEIGHT = 1;
-const unsigned int CURRENT_OLD_WEIGHT = 95; //Time constant : around 0.1s
-const unsigned int CURRENT_NEW_WEIGHT = 5;
+const unsigned int LONG_TERM_OLD_WEIGHT = 999; //Time constant : around 5s
+const unsigned int LONG_TERM_NEW_WEIGHT = 1;
+const unsigned int SHORT_TERM_OLD_WEIGHT = 95; //Time constant : around 0.1s
+const unsigned int SHORT_TERM_NEW_WEIGHT = 5;
 
 //Load switch current reading : V (mV) = R (ohm) * I_load (mA) / 10000
 #if HW_REVISION == 1
@@ -60,7 +60,8 @@ const unsigned int CURRENT_MEAS_DECIMAL_PART = 5; // 2^5
 
 unsigned int _battVoltageBreaks[7];
 unsigned int _avgBattVoltage;
-unsigned int _avgLoadCurrent;
+unsigned int _instantBattVoltage;
+unsigned int _instantLoadCurrent;
 KXKM_STM32_Energy::BatteryType _battType;
 
 /* Initialize battery monitoring resources and determine the type and voltage of
@@ -73,8 +74,8 @@ bool initBatteryMonitoring()
 {
   analogReadResolution(12);
 
-  _avgBattVoltage = readBatteryVoltage();
-  _avgLoadCurrent = readLoadCurrent();
+  _avgBattVoltage = _instantBattVoltage = readBatteryVoltage();
+  _instantLoadCurrent = readLoadCurrent();
   
   _battType = getBatteryTypeSelectorState();
 
@@ -131,10 +132,9 @@ void loopBatteryMonitoring()
     lastAdcRead = millis();
     
     //Exponential smoothing
-    _avgBattVoltage = (_avgBattVoltage * VOLTAGE_OLD_WEIGHT + readBatteryVoltage() * VOLTAGE_NEW_WEIGHT) / (VOLTAGE_OLD_WEIGHT + VOLTAGE_NEW_WEIGHT);
-    _avgLoadCurrent = (_avgLoadCurrent * CURRENT_OLD_WEIGHT + readLoadCurrent() * CURRENT_NEW_WEIGHT) / (CURRENT_OLD_WEIGHT + CURRENT_NEW_WEIGHT);
-
-    // SERIAL_DEBUG(_avgBattVoltage);
+    _instantBattVoltage = (_instantBattVoltage * SHORT_TERM_OLD_WEIGHT + readBatteryVoltage() * SHORT_TERM_NEW_WEIGHT) / (SHORT_TERM_OLD_WEIGHT + SHORT_TERM_NEW_WEIGHT);
+    _instantLoadCurrent = (_instantLoadCurrent * SHORT_TERM_OLD_WEIGHT + readLoadCurrent() * SHORT_TERM_NEW_WEIGHT) / (SHORT_TERM_OLD_WEIGHT + SHORT_TERM_NEW_WEIGHT);
+    _avgBattVoltage = (_avgBattVoltage * LONG_TERM_OLD_WEIGHT + _instantBattVoltage * LONG_TERM_NEW_WEIGHT) / (LONG_TERM_OLD_WEIGHT + LONG_TERM_NEW_WEIGHT);
   }
 }
 
@@ -164,6 +164,11 @@ unsigned int getAverageBatteryVoltage()
   return _avgBattVoltage >> VOLTAGE_MEAS_DECIMAL_PART;
 }
 
+unsigned int getInstantBatteryVoltage()
+{
+  return _instantBattVoltage >> VOLTAGE_MEAS_DECIMAL_PART;
+}
+
 /* Take a load current measurement and return the result in mA */
 unsigned int readLoadCurrent()
 {
@@ -184,10 +189,10 @@ unsigned int readLoadCurrent()
   return (adcRead * CURRENT_MEAS_MULTIPLIER1 / CURRENT_MEAS_DIVIDER * CURRENT_MEAS_MULTIPLIER2) << CURRENT_MEAS_DECIMAL_PART;
 }
 
-/* Return the average load current */
-unsigned int getAverageLoadCurrent()
+/* Return the load current */
+unsigned int getInstantLoadCurrent()
 {
-  return _avgLoadCurrent >> CURRENT_MEAS_DECIMAL_PART;
+  return _instantLoadCurrent >> CURRENT_MEAS_DECIMAL_PART;
 }
 
 /* Return the approximate temperature in degree Celsius from the on-board thermistor.

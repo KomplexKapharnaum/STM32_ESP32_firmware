@@ -28,7 +28,7 @@ Tom Magnier - 04/2018
 #include "AdcToTemperature.h"
 
 // Firmware version
-const int FIRMWARE_VERSION = 2;
+const int FIRMWARE_VERSION = 3;
 
 // Timing configuration
 const unsigned long STARTUP_GUARD_TIME_MS = 5000; // Ignore long presses during this period after startup
