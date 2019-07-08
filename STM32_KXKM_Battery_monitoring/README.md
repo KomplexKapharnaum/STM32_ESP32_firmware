@@ -11,6 +11,8 @@ Pour l'upload :
 * un câble TagConnect TC2030-NL
 
 ### Depuis Arduino
+Dans les préférences, choisir le dossier `STM32_ESP32_firmware` comme "carnet de croquis" / sketchbook
+
 * Type de carte : KXKM_STM32F030 (dans le 2e menu STM32)
 * Serial interface : Generic interface
 * Optimize : Smallest (-Os) with LTO
