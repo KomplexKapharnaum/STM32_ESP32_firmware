@@ -50,6 +50,7 @@ enum state_t {
 
 state_t currentState;
 void enterState(enum state_t newState); // F*** Arduino. Explicit prototype function to avoid the auto generated one.
+void handleButtonEvent(ace_button::AceButton* button, uint8_t eventType, uint8_t buttonState);
 
 ace_button::AceButton button(PUSH_BUTTON_DETECT_PIN, LOW);
 KXKM_STM32_Energy::PushButtonEvent buttonEvent = KXKM_STM32_Energy::NO_EVENT;
@@ -70,8 +71,6 @@ unsigned long criticalSectionEndTime;
   beginSerial(); \
   Serial1.print(str); \
   endSerial();
-
-void handleButtonEvent(ace_button::AceButton* button, uint8_t eventType, uint8_t buttonState);
 
 void setup() {
   pinMode(POWER_ENABLE_PIN, OUTPUT);
