@@ -9,7 +9,7 @@ const uint8_t LED_PWM_MAX_VAL = 4;
 
 volatile uint32_t _ledGaugeState; // LED state. Don't change directly ! Use the helper functions. Update should be atomic because the timer interrupt may trigger at any time.
 
-stimer_t _timer;
+HardwareTimer *_timer;
 
 volatile uint8_t _currentLedIndex = 0;
 volatile uint8_t _currentCycleIndex = 0; //For each LED there are LED_PWM_MAX_VAL cycles
@@ -23,16 +23,19 @@ void setLed(uint8_t index, uint8_t value);
 void setLedGaugePercentage(int value);
 void displayBatteryLevel(int value);
 void displaySingleLedBatteryLevel(int value);
-void ledTimerInterrupt(stimer_t *timer);
+void ledTimerInterrupt(void);
 
 /** Initialize LED gauge display */
 void initLedGauge()
 {
   _ledGaugeState = 0;
 
-  _timer.timer = TIM16;
-  attachIntHandle(&_timer, ledTimerInterrupt);
-  TimerHandleInit(&_timer, 1, (uint16_t)(HAL_RCC_GetHCLKFreq() / 1000) / 4); // ~1ms
+  _timer = new HardwareTimer(TIM16);
+  _timer->setOverflow(1000, HERTZ_FORMAT); // ~1ms
+  _timer->attachInterrupt(ledTimerInterrupt);
+  _timer->resume();
+
+  // TimerHandleInit(&_timer, 1, (uint16_t)(HAL_RCC_GetHCLKFreq() / 1000) / 4); // ~1ms
 }
 
 void clearLeds()
@@ -129,7 +132,7 @@ void displaySingleLedBatteryLevel(int value)
 }
 
 // Timer interrupt
-void ledTimerInterrupt(stimer_t *timer)
+void ledTimerInterrupt(void)
 {
   uint8_t value = (uint8_t)(_ledGaugeState >> (4*_currentLedIndex) ) & 0x0F;
 
