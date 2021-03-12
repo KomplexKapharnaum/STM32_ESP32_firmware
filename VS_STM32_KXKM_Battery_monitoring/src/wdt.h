@@ -20,10 +20,10 @@ void initWatchdog()
   IwdgHandle.Init.Reload    = 312; //40000 / 128
   IwdgHandle.Init.Window = IWDG_WINDOW_DISABLE;
 
-  // HAL_IWDG_Init(&IwdgHandle);
+  HAL_IWDG_Init(&IwdgHandle);
 }
 
 void refreshWatchdog()
 {
-  // HAL_IWDG_Refresh(&IwdgHandle);
+  HAL_IWDG_Refresh(&IwdgHandle);
 }
