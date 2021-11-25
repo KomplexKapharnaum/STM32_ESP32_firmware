@@ -22,11 +22,14 @@ Tom Magnier - 04/2018
 Richard Fontaine - 03/2021 (adapt pio)
 */
 
+// BOARD_ID
+#define BOARD_ID 1
+
 // HW_REVISION
-#define HW_REVISION 2
+#define HW_REVISION 3
 
 // Firmware version
-const int FIRMWARE_VERSION = 3;
+const int FIRMWARE_VERSION = 4;
 
 #include <AceButton.h>
 #include "KXKM_STM32_energy_API.h"
@@ -59,7 +62,6 @@ unsigned long customLedSetTime;
 unsigned long lastStateChangeTime;
 unsigned long criticalSectionEndTime;
 
-#include "board_id.h"
 #include "AdcToTemperature.h"
 #include "batt_monitoring.h"
 #include "led_gauge.h"
