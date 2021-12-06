@@ -4,7 +4,7 @@
 ### Prerequis
 * Arduino 
 * Dans les préférences Arduino ajouter https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json à la liste "URL de gestionnaire de cartes supplémentaires" 
-* Dans les préférences Arduino ajouter https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stmicroelectronics_index.json à la liste "URL de gestionnaire de cartes supplémentaires" 
+* Dans les préférences Arduino ajouter https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json à la liste "URL de gestionnaire de cartes supplémentaires" 
 * Installer STM32 Cores depuis le gestionnaire de carte (pour installer les outils, etc).
 
 Pour l'upload : 
