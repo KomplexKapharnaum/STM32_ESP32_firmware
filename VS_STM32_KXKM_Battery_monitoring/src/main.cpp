@@ -22,11 +22,14 @@ Tom Magnier - 04/2018
 Richard Fontaine - 03/2021 (adapt pio)
 */
 
+// HW_ID
+#define HW_ID 0
+
 // HW_REVISION
 #define HW_REVISION 2
 
 // Firmware version
-const int FIRMWARE_VERSION = 3;
+const int FIRMWARE_VERSION = 4;
 
 #include <AceButton.h>
 #include "KXKM_STM32_energy_API.h"

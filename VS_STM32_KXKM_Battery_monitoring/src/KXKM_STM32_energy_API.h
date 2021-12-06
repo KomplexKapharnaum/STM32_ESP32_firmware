@@ -18,7 +18,7 @@ public:
   static constexpr char* PREAMBLE = "### ";
 
   /* API Version */
-  static constexpr uint8_t API_VERSION = 2;
+  static constexpr uint8_t API_VERSION = 3;
 
   /* Command types (main processor > STM32) */
   enum CommandType {
@@ -26,6 +26,11 @@ public:
        No argument.
        The STM32 will answer with the board revision number. */
     GET_HW_REVISION = 'H',
+
+    /* Get hardware revision.
+       No argument.
+       The STM32 will answer with the board revision number. */
+    GET_HW_ID = 'X',
 
     /* Get board ID.
        No argument.
