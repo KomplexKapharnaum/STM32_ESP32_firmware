@@ -23,6 +23,7 @@ Choisir la version HW dans le menu "Hardware version" et mettre à jour l'ID de 
 - dans le dossier `STM32_ESP32_firmware\hardware\kxkm\stm32` editer le fichier platform.txt
 - changer le : compiler.path={runtime.tools.arm-none-eabi-gcc-6-2017-q2-update.path}/bin/ 
 - en compiler.path=C:\Users\ririf\AppData\Local\Arduino15\packages\STM32\tools\xpack-arm-none-eabi-gcc\9.2.1-1.1\bin\
+- pour linux peut etre compiler.path=/usr/bin/
 
 Choisir "Exporter les binaires compilées".
 
