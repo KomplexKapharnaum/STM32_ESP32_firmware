@@ -21,6 +21,8 @@ The processor serial port is available on the ESP32 programmation connector. RX 
 Tom Magnier - 04/2018
 */
 
+#define HW_REVISION 2
+
 #include <AceButton.h>
 #include "KXKM_STM32_energy_API.h"
 #include "pin_mapping.h"
