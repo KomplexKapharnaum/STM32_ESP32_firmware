@@ -13,6 +13,17 @@ stimer_t _timer;
 volatile uint8_t _currentLedIndex = 0;
 volatile uint8_t _currentCycleIndex = 0; //For each LED there are LED_PWM_MAX_VAL cycles
 
+void initLedGauge();
+void clearLeds();
+void setSingleLed(uint8_t index);
+void setSingleLed(uint8_t index, uint8_t value);
+void setLed(uint8_t index);
+void setLed(uint8_t index, uint8_t value);
+void setLedGaugePercentage(int value);
+void displayBatteryLevel(int value);
+void displaySingleLedBatteryLevel(int value);
+void ledTimerInterrupt(void);
+
 /** Initialize LED gauge display */
 void initLedGauge()
 {

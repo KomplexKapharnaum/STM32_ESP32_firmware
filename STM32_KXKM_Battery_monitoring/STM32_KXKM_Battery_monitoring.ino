@@ -28,7 +28,7 @@ Tom Magnier - 04/2018
 #include "pin_mapping.h"
 #include "board_id.h"
 #include "AdcToTemperature.h"
-
+#include "led_gauge.ino"
 // Firmware version
 const int FIRMWARE_VERSION = 3;
 
