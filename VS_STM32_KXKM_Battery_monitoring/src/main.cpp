@@ -26,10 +26,11 @@ Richard Fontaine - 03/2021 (adapt pio)
 #define BOARD_ID 1
 
 // HW_REVISION
-#define HW_REVISION 3
+#define HW_REVISION 2
 
 // Firmware version
 const int FIRMWARE_VERSION = 4;
+#include "Arduino.h"
 
 #include <AceButton.h>
 #include "KXKM_STM32_energy_API.h"
@@ -75,6 +76,10 @@ unsigned long criticalSectionEndTime;
   endSerial();
 
 void setup() {
+  
+  // pinMode(18, OUTPUT);
+  // digitalWrite(18, HIGH);
+
   pinMode(POWER_ENABLE_PIN, OUTPUT);
   pinMode(ESP32_ENABLE_PIN, OUTPUT);
   pinMode(MAIN_OUT_ENABLE_PIN, OUTPUT);
