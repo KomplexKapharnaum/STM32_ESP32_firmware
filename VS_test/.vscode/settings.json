@@ -1,0 +1,27 @@
+{
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "explorer.confirmDelete": false,
+    "C_Cpp.updateChannel": "Insiders",
+    "git.ignoreWindowsGit27Warning": true,
+    "explorer.confirmDragAndDrop": false,
+    "workbench.statusBar.visible": true,
+    "workbench.activityBar.visible": true,
+    "[html]": {
+        "editor.defaultFormatter": "lonefy.vscode-JS-CSS-HTML-formatter"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "lonefy.vscode-JS-CSS-HTML-formatter"
+    },
+    "window.zoomLevel": 0,
+    "git.confirmSync": false,
+    "git.enableSmartCommit": true,
+    "stm32-for-vscode.armToolchainPath": "C:\\Program Files (x86)\\GNU Arm Embedded Toolchain\\10 2020-q4-major\\bin",
+    "stm32-for-vscode.makePath": "C:\\Program Files (x86)\\GNU MCU Eclipse\\Build Tools\\2.10-20180103-1919\\bin\\make",
+    "stm32-for-vscode.openOCDPath": "C:\\Program Files (x86)\\GNU MCU Eclipse\\OpenOCD\\0.10.0-7-20180123-1217\\bin",
+    "cmake.cacheInit": null,
+    "cmake.debugConfig": {
+    
+    }
+}

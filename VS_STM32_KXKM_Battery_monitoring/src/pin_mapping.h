@@ -34,6 +34,7 @@ const uint8_t ESP32_TX_PIN = PA10;                     //
 const uint8_t LED_ORDERING[LED_COUNT] = {1, 0, 3, 5, 4, 2};
 
 #elif HW_REVISION == 2
+
 const uint8_t LED_PINS[LED_PINS_COUNT] = {3,2,0,1};
 const uint8_t POWER_ENABLE_PIN = 12; //Self power enable. Keep HIGH to stay powered
 const uint8_t MAIN_OUT_ENABLE_PIN = 6; //Load switch enable line
