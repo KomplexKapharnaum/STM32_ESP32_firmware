@@ -60,7 +60,7 @@ const unsigned int SHORT_TERM_NEW_WEIGHT = 5;
   const unsigned long CURRENT_MEAS_RESISTOR = 470;
 #elif HW_REVISION == 2
   const unsigned long CURRENT_MEAS_RESISTOR = 2000;
-  #elif HW_REVISION == 3
+#elif HW_REVISION == 3
   const unsigned long CURRENT_MEAS_RESISTOR = 2000;
 #endif
 // Multiplier is split in two to avoid overflow.
