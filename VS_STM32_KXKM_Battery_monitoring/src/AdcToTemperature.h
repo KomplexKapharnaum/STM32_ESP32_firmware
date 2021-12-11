@@ -23,15 +23,15 @@
 //
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/** Calculate the temperature in °C from ADC (analogRead) value (best accuracy).
- *
- *  This conversion should generate reasonably accurate results over the entire range of 
- *  the thermistor, it implements the common 'Beta' approximation for a thermistor
- *  having Beta of 3380, and nominal values of 10000Ω at 25°C
- *
- *  @param   The result of an ADC conversion (analogRead) in the range 0 to 4095
- *  @return  Temperature in °C
- */
+// /** Calculate the temperature in °C from ADC (analogRead) value (best accuracy).
+//  *
+//  *  This conversion should generate reasonably accurate results over the entire range of 
+//  *  the thermistor, it implements the common 'Beta' approximation for a thermistor
+//  *  having Beta of 3380, and nominal values of 10000Ω at 25°C
+//  *
+//  *  @param   The result of an ADC conversion (analogRead) in the range 0 to 4095
+//  *  @return  Temperature in °C
+//  */
 
 float  convertAnalogToTemperature(unsigned int analogReadValue)
 {
@@ -45,48 +45,48 @@ float  convertAnalogToTemperature(unsigned int analogReadValue)
 
 
 
-/** Approximate the temperature in °C from ADC (analogRead) value, using floating-point math.
- *
- *  This approximation uses floating point math, but much less complex so may be useful for 
- *  improved performance, reducing program memory consumption, and reducing runtime memory
- *  usage.
- *
- *  This conversion has the following caveats...
- *    Suitable Range              : -5°C to 40°C 
- *    Average Error (Within Range): +/- 0.198 °C°C
- *    Maximum Error (Within Range): 0.639 °C°C
- *
- *  This approximation implements a linear regression of the Beta approximation 
- *  for a thermistor having Beta of 3380, and nominal values of 10000Ω at 
- *  25°C calculated for temperatures across the range above.
- *
- * @param   The result of an ADC conversion (analogRead) in the range 0 to 4095
- * @return  Temperature in °C (+/- 0.639 °C)
- */
+// /** Approximate the temperature in °C from ADC (analogRead) value, using floating-point math.
+//  *
+//  *  This approximation uses floating point math, but much less complex so may be useful for 
+//  *  improved performance, reducing program memory consumption, and reducing runtime memory
+//  *  usage.
+//  *
+//  *  This conversion has the following caveats...
+//  *    Suitable Range              : -5°C to 40°C 
+//  *    Average Error (Within Range): +/- 0.198 °C°C
+//  *    Maximum Error (Within Range): 0.639 °C°C
+//  *
+//  *  This approximation implements a linear regression of the Beta approximation 
+//  *  for a thermistor having Beta of 3380, and nominal values of 10000Ω at 
+//  *  25°C calculated for temperatures across the range above.
+//  *
+//  * @param   The result of an ADC conversion (analogRead) in the range 0 to 4095
+//  * @return  Temperature in °C (+/- 0.639 °C)
+//  */
 
 float  approximateTemperatureFloat(unsigned int analogReadValue)
 {
   return -0.0259503655562173*analogReadValue+78.4162992015644;
 }
 
-/** Approximate the temperature in °C from ADC (analogRead) value, using integer math.
- *
- *  This approximation uses only integer math, so has a subsequent resolution of
- *  of only 1°C, but for very small microcontrollers this is useful as floating point
- *  math eats your program memory.
- *
- *  This conversion has the following caveats...
- *    Suitable Range              : -5°C to 40°C 
- *    Average Error (Within Range): +/- 0.386 °C°C
- *    Maximum Error (Within Range): 1.100 °C°C
- *
- *  This approximation implements a linear regression of the Beta approximation 
- *  for a thermistor having Beta of 3380, and nominal values of 10000Ω at 
- *  25°C calculated for temperatures across the range above.
- *
- * @param   The result of an ADC conversion (analogRead) in the range 0 to 4095
- * @return  Temperature in °C (+/- 1.100 °C)
- */
+// /** Approximate the temperature in °C from ADC (analogRead) value, using integer math.
+//  *
+//  *  This approximation uses only integer math, so has a subsequent resolution of
+//  *  of only 1°C, but for very small microcontrollers this is useful as floating point
+//  *  math eats your program memory.
+//  *
+//  *  This conversion has the following caveats...
+//  *    Suitable Range              : -5°C to 40°C 
+//  *    Average Error (Within Range): +/- 0.386 °C°C
+//  *    Maximum Error (Within Range): 1.100 °C°C
+//  *
+//  *  This approximation implements a linear regression of the Beta approximation 
+//  *  for a thermistor having Beta of 3380, and nominal values of 10000Ω at 
+//  *  25°C calculated for temperatures across the range above.
+//  *
+//  * @param   The result of an ADC conversion (analogRead) in the range 0 to 4095
+//  * @return  Temperature in °C (+/- 1.100 °C)
+//  */
 
 int approximateTemperatureInt(unsigned int analogReadValue)
 {
