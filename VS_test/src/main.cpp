@@ -1,47 +1,59 @@
 
+// HW_REVISION
+#define HW_REVISION 2
+
 #include "Arduino.h"
-#include "PinNames.h"
-#include "pinmap.h"
 
+#include "pin_mapping.h"
+#include "led_gauge.h"
 
-const PinName myPins[18] = {
-  PA_0,   //D0
-  PA_1,   //D1
-  PA_2,   //D2
-  PA_3,   //D3
-  PA_4,   //D4
-  PA_5,   //D5
-  PA_6,   //D6
-  PA_7,   //D7
-  PA_9,   //D8
-  PA_10,  //D9
-  PA_13,  //D10
-  PA_14,  //D11
-  PF_0,   //D12
-  PF_1,   //D13
-  PB_1,   //D14
-  PA_4,   //D15/A0 - Duplicated for ADC use
-  PA_5,   //D16/A1
-  PB_1,   //D17/A2
-};
-
-void setup() 
+void setup()
 {
+  pinMode(POWER_ENABLE_PIN, OUTPUT);
+  pinMode(ESP32_ENABLE_PIN, OUTPUT);
+  pinMode(MAIN_OUT_ENABLE_PIN, OUTPUT);
+  pinMode(PUSH_BUTTON_DETECT_PIN, INPUT);
 
-  for (int k=0; k<18; k++) {
+#if HW_REVISION > 1
+  pinMode(TEMP_MEAS_PIN, OUTPUT);
+  digitalWrite(TEMP_MEAS_PIN, LOW); // Avoid thermistor self heating
+#endif
 
-    PinName pin = myPins[k];
+  for (int i = 0; i < 2; i++)
+    pinMode(BATT_TYPE_SELECTOR_PINS[i], INPUT_PULLUP);
 
-    // pinMode OUTPUT
-    pin_function(pin, STM_PIN_DATA(STM_MODE_OUTPUT_PP, GPIO_NOPULL, 0));
+  initLedGauge();
 
-    // write HIGH
-    digital_io_write(get_GPIO_Port(STM_PORT(pin)), STM_LL_GPIO_PIN(pin), HIGH);
-  }
-
+  // // Power up the board
+  // set3V3RegState(true); //Keep 3.3V regulator enabled
+  digitalWrite(12, HIGH);
 }
 
-void loop() 
+void loop()
 {
+  // Start up LED animation
+  for (uint8_t i = 1; i <= 100; i++)
+  {
+    setLedGaugePercentage(i);
+    delay(40);
+  }
+  for (uint8_t i = 100; i >= 1; i--)
+  {
+    setLedGaugePercentage(i);
+    delay(40);
+  }
+  clearLeds();
+  for (uint8_t i = 1; i <= 100; i++)
+  {
+    displaySingleLedBatteryLevel(i);
+    delay(40);
+  }
+  for (uint8_t i = 100; i >= 1; i--)
+  {
+    displaySingleLedBatteryLevel(i);
+    delay(40);
+  }
+  clearLeds();
+
 
 }

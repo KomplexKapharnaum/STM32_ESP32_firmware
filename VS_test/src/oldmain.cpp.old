@@ -1,0 +1,195 @@
+
+#include <Arduino.h>
+// #include "PinNames.h"
+// #include "pinmap.h"
+
+#include "STM32TimerInterrupt.h"
+#include "STM32_ISR_Timer.h"
+
+#define TIMER_INTERVAL_MS 100
+#define HW_TIMER_INTERVAL_MS 50
+
+// Init STM32 timer TIM1
+STM32Timer ITimer(TIM1);
+
+// Init STM32_ISR_Timer
+// Each STM32_ISR_Timer can service 16 different ISR-based timers
+STM32_ISR_Timer ISR_Timer;
+
+#define TIMER_INTERVAL_0_5S 500L
+#define TIMER_INTERVAL_1S 1000L
+#define TIMER_INTERVAL_1_5S 1500L
+
+void TimerHandler()
+{
+  ISR_Timer.run();
+}
+
+void doingSomething1()
+{
+  digitalWrite(0, HIGH); // red yel yel gre gre gre
+  digitalWrite(1, HIGH); // 1   0   0   0   0   0
+  digitalWrite(2, HIGH);
+  digitalWrite(3, LOW);
+}
+
+void doingSomething2()
+{
+  digitalWrite(0, HIGH); // red yel yel gre gre gre
+  digitalWrite(1, HIGH); // 0   1   1   0   0   0
+  digitalWrite(2, LOW);
+  digitalWrite(3, HIGH);
+}
+void doingSomething3()
+{
+  digitalWrite(0, HIGH); // red yel yel gre gre gre
+  digitalWrite(1, LOW);  // 0   0   0   0   1   0
+  digitalWrite(2, HIGH);
+  digitalWrite(3, HIGH);
+}
+
+// const PinName myPins[18] = {
+//     PA_0,  // D0
+//     PA_1,  // D1
+//     PA_2,  // D2
+//     PA_3,  // D3
+//     PA_4,  // D4
+//     PA_5,  // D5
+//     PA_6,  // D6
+//     PA_7,  // D7
+//     PA_9,  // D8
+//     PA_10, // D9
+//     PA_13, // D10
+//     PA_14, // D11
+//     PF_0,  // D12
+//     PF_1,  // D13
+//     PB_1,  // D14
+//     PA_4,  // D15/A0 - Duplicated for ADC use
+//     PA_5,  // D16/A1
+//     PB_1,  // D17/A2
+// };
+
+int k = 1000;
+
+void setup()
+{
+  pinMode(12, OUTPUT);
+  digitalWrite(12, HIGH);
+
+  pinMode(0, OUTPUT);
+  pinMode(1, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
+
+  // digitalWrite(0, HIGH); // red yel yel gre gre gre
+  // digitalWrite(1, LOW);  // 0   0   1   0   1   0
+  // digitalWrite(2, LOW);
+  // digitalWrite(3, LOW);
+
+  // doingSomething1();
+  // doingSomething2();
+  // doingSomething3();
+
+  // ITimer.attachInterruptInterval(HW_TIMER_INTERVAL_MS * 1000, TimerHandler);
+
+  // doingSomething1();
+
+  //  if (ITimer.attachInterruptInterval(HW_TIMER_INTERVAL_MS * 1000, TimerHandler))
+  // {
+  //   Serial.print(F("Starting ITimer OK, millis() = ")); Serial.println(millis());
+  // }
+
+  // ISR_Timer.setInterval(TIMER_INTERVAL_0_5S, doingSomething1);
+  // ISR_Timer.setInterval(TIMER_INTERVAL_1S, doingSomething2);
+  // ISR_Timer.setInterval(TIMER_INTERVAL_1_5S, doingSomething3);
+
+  // doingSomething2();
+
+  // // for (int k=0; k<18; k++) {
+
+  //   PinName pin = myPins[12];
+
+  //   // pinMode OUTPUT
+  //   pin_function(pin, STM_PIN_DATA(STM_MODE_OUTPUT_PP, GPIO_NOPULL, 0));
+
+  //   // write HIGH
+  //   digital_io_write(get_GPIO_Port(STM_PORT(pin)), STM_LL_GPIO_PIN(pin), HIGH);
+  // // }
+}
+
+void loop()
+{
+  delay(k);
+  doingSomething1();
+  delay(k);
+  doingSomething2();
+  delay(k);
+  doingSomething3();
+
+  // digitalWrite(0, HIGH); // red yel yel gre gre gre
+  // digitalWrite(1, HIGH); // 1   0   0   0   0   0
+  // digitalWrite(2, HIGH);
+  // digitalWrite(3, LOW);
+
+  // digitalWrite(0, HIGH); // red yel yel gre gre gre
+  // digitalWrite(1, HIGH); // 0   1   1   0   0   0
+  // digitalWrite(2, LOW);
+  // digitalWrite(3, HIGH);
+
+  // digitalWrite(0, HIGH); // red yel yel gre gre gre
+  // digitalWrite(1, LOW);  // 0   0   0   0   1   0
+  // digitalWrite(2, HIGH);
+  // digitalWrite(3, HIGH);
+
+  // digitalWrite(0, LOW);  // red yel yel gre gre gre
+  // digitalWrite(1, HIGH); // 0   0   0   1   0   1
+  // digitalWrite(2, HIGH);
+  // digitalWrite(3, HIGH);
+
+  // digitalWrite(0, LOW);  // red yel yel gre gre gre
+  // digitalWrite(1, HIGH); // 1   0   0   1   0   0.2
+  // digitalWrite(2, HIGH);
+  // digitalWrite(3, LOW);
+
+  // digitalWrite(0, HIGH); // red yel yel gre gre gre
+  // digitalWrite(1, LOW);  // 1   0   0   0   1   0
+  // digitalWrite(2, HIGH);
+  // digitalWrite(3, LOW);
+
+  // digitalWrite(0, HIGH); // red yel yel gre gre gre
+  // digitalWrite(1, LOW);  // 0   0   0   0   1   0
+  // digitalWrite(2, HIGH);
+  // digitalWrite(3, HIGH);
+
+  // digitalWrite(0, HIGH); // red yel yel gre gre gre
+  // digitalWrite(1, HIGH); // 0   0   1   0   0   0
+  // digitalWrite(2, LOW);
+  // digitalWrite(3, LOW);
+
+  // digitalWrite(0, HIGH); // red yel yel gre gre gre
+  // digitalWrite(1, LOW);  // 0   0   1   0   1   0
+  // digitalWrite(2, LOW);
+  // digitalWrite(3, LOW);
+
+  // delay(k);
+
+  // digitalWrite(0, HIGH); // 2 yellow
+  // digitalWrite(1, HIGH);
+  // digitalWrite(2, LOW);
+  // digitalWrite(3, HIGH);
+
+  // delay(k);
+
+  // digitalWrite(0, HIGH); // av der green
+  // digitalWrite(1, LOW);
+  // digitalWrite(2, HIGH);
+  // digitalWrite(3, HIGH);
+
+  // delay(k);
+
+  // digitalWrite(0, LOW); // av av green  der green
+  // digitalWrite(1, HIGH);
+  // digitalWrite(2, HIGH);
+  // digitalWrite(3, HIGH);
+  // delay(k);
+}
