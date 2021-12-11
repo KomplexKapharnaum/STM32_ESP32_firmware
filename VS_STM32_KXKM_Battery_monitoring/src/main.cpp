@@ -77,8 +77,8 @@ unsigned long criticalSectionEndTime;
 
 void setup() {
   
-  // pinMode(18, OUTPUT);
-  // digitalWrite(18, HIGH);
+  // pinMode(12, OUTPUT);
+  // digitalWrite(12, HIGH);
 
   pinMode(POWER_ENABLE_PIN, OUTPUT);
   pinMode(ESP32_ENABLE_PIN, OUTPUT);
