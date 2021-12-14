@@ -14,8 +14,6 @@ void setup()
   pinMode(MAIN_OUT_ENABLE_PIN, OUTPUT);
   pinMode(PUSH_BUTTON_DETECT_PIN, INPUT);
 
-  // pinMode(AUTO_BOOT_PIN, INPUT);
-
   for (int i = 0; i < 2; i++)
     pinMode(BATT_TYPE_SELECTOR_PINS[i], INPUT_PULLUP);
 
