@@ -23,13 +23,15 @@ Richard Fontaine - 03/2021 (adapt pio)
 */
 
 // BOARD_ID
-#define BOARD_ID 1
+#define BOARD_ID 151
 
 // HW_REVISION
 #define HW_REVISION 3
 
 // Firmware version
 const int FIRMWARE_VERSION = 4;
+
+// include
 #include "Arduino.h"
 
 #include <AceButton.h>
