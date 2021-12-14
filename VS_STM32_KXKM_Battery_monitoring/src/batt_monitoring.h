@@ -30,17 +30,18 @@ unsigned int getInstantBatteryVoltage();
 unsigned int readLoadCurrent();
 unsigned int getInstantLoadCurrent();
 int readApproxTempDegC();
+bool getAutoBootStatus();
 int getBatteryPercentage();
 uint16_t readCalibrationValue();
 uint8_t findCellCount(unsigned int voltage, unsigned int cellMin, unsigned int cellMax);
 
 /* All voltages are given in mV */
-const unsigned int LIPO_VOLTAGE_BREAKS[] = {3500, 3650, 3700, 3750, 3825, 3950, 4200}; //For one cell
-const unsigned int LIFE_VOLTAGE_BREAKS[] = {2920, 3140, 3200, 3220, 3240, 3260, 3600}; //For one cell
+const unsigned int LIPO_VOLTAGE_BREAKS[] = {3500, 3650, 3700, 3750, 3825, 3950, 4200}; // For one cell
+const unsigned int LIFE_VOLTAGE_BREAKS[] = {2920, 3140, 3200, 3220, 3240, 3260, 3600}; // For one cell
 
 const unsigned int INITIAL_CELL_VOLTAGE_TOLERANCE = 50; // Tolerance added to the cell charged voltage
 
-const unsigned int ADC_READS_COUNT = 4; // Averaging readings to improve resolution
+const unsigned int ADC_READS_COUNT = 4;         // Averaging readings to improve resolution
 const unsigned int CALIBRATION_VOLTAGE = 24000; // Voltage used for the calibration
 
 const unsigned long ADC_READ_PERIOD_MS = 5; // ADC read every 5ms
@@ -50,25 +51,25 @@ const int BATT_LOW_LEVEL = 10; // Low battery level (%)
 // ADC reading : exponential averaging
 // Time constant (samples) =  -1 / ln(OLD_WEIGHT/(OLD_WEIGHT+NEW_WEIGHT))
 // Time constant (seconds) =  - ADC_READ_PERIOD_MS / 1000 * ln(OLD_WEIGHT/(OLD_WEIGHT+NEW_WEIGHT))
-const unsigned int LONG_TERM_OLD_WEIGHT = 999; //Time constant : around 5s
+const unsigned int LONG_TERM_OLD_WEIGHT = 999; // Time constant : around 5s
 const unsigned int LONG_TERM_NEW_WEIGHT = 1;
-const unsigned int SHORT_TERM_OLD_WEIGHT = 95; //Time constant : around 0.1s
+const unsigned int SHORT_TERM_OLD_WEIGHT = 95; // Time constant : around 0.1s
 const unsigned int SHORT_TERM_NEW_WEIGHT = 5;
 
-//Load switch current reading : V (mV) = R (ohm) * I_load (mA) / 10000
+// Load switch current reading : V (mV) = R (ohm) * I_load (mA) / 10000
 #if HW_REVISION == 1
-  const unsigned long CURRENT_MEAS_RESISTOR = 470;
+const unsigned long CURRENT_MEAS_RESISTOR = 470;
 #elif HW_REVISION == 2
-  const unsigned long CURRENT_MEAS_RESISTOR = 2000;
+const unsigned long CURRENT_MEAS_RESISTOR = 2000;
 #elif HW_REVISION == 3
-  const unsigned long CURRENT_MEAS_RESISTOR = 2000;
+const unsigned long CURRENT_MEAS_RESISTOR = 2000;
 #endif
 // Multiplier is split in two to avoid overflow.
 const unsigned long CURRENT_MEAS_MULTIPLIER1 = 3300 * 100;
-const unsigned long CURRENT_MEAS_DIVIDER =  (4095 * CURRENT_MEAS_RESISTOR);
+const unsigned long CURRENT_MEAS_DIVIDER = (4095 * CURRENT_MEAS_RESISTOR);
 const unsigned long CURRENT_MEAS_MULTIPLIER2 = 100;
 
-//Increase fixed point precision to allow longer time constants.
+// Increase fixed point precision to allow longer time constants.
 const unsigned int VOLTAGE_MEAS_DECIMAL_PART = 5; // 2^5
 const unsigned int CURRENT_MEAS_DECIMAL_PART = 5; // 2^5
 
@@ -90,48 +91,48 @@ bool initBatteryMonitoring()
 
   _avgBattVoltage = _instantBattVoltage = readBatteryVoltage();
   _instantLoadCurrent = readLoadCurrent();
-  
+
   _battType = getBatteryTypeSelectorState();
 
   switch (_battType)
   {
-    case KXKM_STM32_Energy::BATTERY_LIPO: //LiPo
-    {
-      uint8_t cells = findCellCount(getAverageBatteryVoltage(), LIPO_VOLTAGE_BREAKS[0], LIPO_VOLTAGE_BREAKS[6]);
+  case KXKM_STM32_Energy::BATTERY_LIPO: // LiPo
+  {
+    uint8_t cells = findCellCount(getAverageBatteryVoltage(), LIPO_VOLTAGE_BREAKS[0], LIPO_VOLTAGE_BREAKS[6]);
 
-      //SERIAL_DEBUG("LiPo");
-      //SERIAL_DEBUG(cells);
+    // SERIAL_DEBUG("LiPo");
+    // SERIAL_DEBUG(cells);
 
-      for (int i = 0; i < 7; i++)
-        _battVoltageBreaks[i] = cells * LIPO_VOLTAGE_BREAKS[i];
+    for (int i = 0; i < 7; i++)
+      _battVoltageBreaks[i] = cells * LIPO_VOLTAGE_BREAKS[i];
 
-      if (cells == 0)
-        return false; // The selector is on the LiPo / LiFe state but the voltage doesn't match !
+    if (cells == 0)
+      return false; // The selector is on the LiPo / LiFe state but the voltage doesn't match !
 
-      break;
-    }
+    break;
+  }
 
-    case KXKM_STM32_Energy::BATTERY_LIFE: //LiFe
-    {
-      uint8_t cells = findCellCount(getAverageBatteryVoltage(), LIFE_VOLTAGE_BREAKS[0], LIFE_VOLTAGE_BREAKS[6]);
+  case KXKM_STM32_Energy::BATTERY_LIFE: // LiFe
+  {
+    uint8_t cells = findCellCount(getAverageBatteryVoltage(), LIFE_VOLTAGE_BREAKS[0], LIFE_VOLTAGE_BREAKS[6]);
 
-      //SERIAL_DEBUG("LiFe");
-      //SERIAL_DEBUG(cells);
+    // SERIAL_DEBUG("LiFe");
+    // SERIAL_DEBUG(cells);
 
-      for (int i = 0; i < 7; i++)
-        _battVoltageBreaks[i] = cells * LIFE_VOLTAGE_BREAKS[i];
+    for (int i = 0; i < 7; i++)
+      _battVoltageBreaks[i] = cells * LIFE_VOLTAGE_BREAKS[i];
 
-      if (cells == 0)
-        return false; // The selector is on the LiPo / LiFe state but the voltage doesn't match !
+    if (cells == 0)
+      return false; // The selector is on the LiPo / LiFe state but the voltage doesn't match !
 
-      break;
-    }
-    case KXKM_STM32_Energy::BATTERY_CUSTOM: //Custom. Battery monitoring disabled or will be set later.
-    default:
-      // SERIAL_DEBUG("custom");
-      for (int i = 0; i < 7; i++)
-        _battVoltageBreaks[i] = 0;
-      break;
+    break;
+  }
+  case KXKM_STM32_Energy::BATTERY_CUSTOM: // Custom. Battery monitoring disabled or will be set later.
+  default:
+    // SERIAL_DEBUG("custom");
+    for (int i = 0; i < 7; i++)
+      _battVoltageBreaks[i] = 0;
+    break;
   }
 
   return true;
@@ -144,8 +145,8 @@ void loopBatteryMonitoring()
   if (millis() - lastAdcRead > ADC_READ_PERIOD_MS)
   {
     lastAdcRead = millis();
-    
-    //Exponential smoothing
+
+    // Exponential smoothing
     _instantBattVoltage = (_instantBattVoltage * SHORT_TERM_OLD_WEIGHT + readBatteryVoltage() * SHORT_TERM_NEW_WEIGHT) / (SHORT_TERM_OLD_WEIGHT + SHORT_TERM_NEW_WEIGHT);
     _instantLoadCurrent = (_instantLoadCurrent * SHORT_TERM_OLD_WEIGHT + readLoadCurrent() * SHORT_TERM_NEW_WEIGHT) / (SHORT_TERM_OLD_WEIGHT + SHORT_TERM_NEW_WEIGHT);
     _avgBattVoltage = (_avgBattVoltage * LONG_TERM_OLD_WEIGHT + _instantBattVoltage * LONG_TERM_NEW_WEIGHT) / (LONG_TERM_OLD_WEIGHT + LONG_TERM_NEW_WEIGHT);
@@ -214,22 +215,41 @@ unsigned int getInstantLoadCurrent()
  */
 int readApproxTempDegC()
 {
-  #if HW_REVISION == 1
-    return 25;
-  #else
-    pinMode(TEMP_MEAS_PIN, INPUT);
-    delayMicroseconds(10);
+#if HW_REVISION == 1
+  return 25;
+#elif HW_REVISION == 2
+  pinMode(TEMP_MEAS_PIN, INPUT);
+  delayMicroseconds(10);
 
-    unsigned long adcRead = 0;
-    for (int i = 0; i < ADC_READS_COUNT; i++)
-      adcRead += analogRead(TEMP_MEAS_PIN);
-    adcRead /= ADC_READS_COUNT;
-    
-    pinMode(TEMP_MEAS_PIN, OUTPUT);
-    digitalWrite(TEMP_MEAS_PIN, LOW); // Avoid thermistor self heating
-    
-    return approximateTemperatureInt(adcRead);
-  #endif
+  unsigned long adcRead = 0;
+  for (int i = 0; i < ADC_READS_COUNT; i++)
+    adcRead += analogRead(TEMP_MEAS_PIN);
+  adcRead /= ADC_READS_COUNT;
+
+  pinMode(TEMP_MEAS_PIN, OUTPUT);
+  digitalWrite(TEMP_MEAS_PIN, LOW); // Avoid thermistor self heating
+
+  return approximateTemperatureInt(adcRead);
+#endif
+}
+
+/* Return the stat of autoboot
+ * Only on revision 3
+ */
+bool getAutoBootStatus()
+{
+#if HW_REVISION > 2
+  if (digitalRead(AUTO_BOOT_PIN))
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+#else
+  return false;
+#endif
 }
 
 /* Return the battery percentage using the average reading.
@@ -264,7 +284,7 @@ int getBatteryPercentage()
     lowerIdx = upperIdx;
   }
 
-  return -1; //should have returned before !
+  return -1; // should have returned before !
 }
 
 /* Read the battery type selector */
@@ -286,8 +306,8 @@ uint16_t readCalibrationValue()
 {
   uint16_t ob = (HAL_FLASHEx_OBGetUserData(OB_DATA_ADDRESS_DATA1) << 8) + HAL_FLASHEx_OBGetUserData(OB_DATA_ADDRESS_DATA0);
 
-  if (ob == 0xFFFF) //Unprogrammed
-    ob = 24000 * 316 / (316+2700) * 4095 / 3300; // Default value : voltage is sensed through a 31.6k / 270k resistive divider, referenced to 3.3V
+  if (ob == 0xFFFF)                                // Unprogrammed
+    ob = 24000 * 316 / (316 + 2700) * 4095 / 3300; // Default value : voltage is sensed through a 31.6k / 270k resistive divider, referenced to 3.3V
 
   return ob;
 }
