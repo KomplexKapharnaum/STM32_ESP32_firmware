@@ -44,7 +44,7 @@ const uint8_t BATT_TYPE_SELECTOR_PINS[] = {10,11}; //3-way selector
 const uint8_t LOAD_CURRENT_SENSE_PIN = 5; //Load switch current measurement
 const uint8_t BATT_VOLTAGE_SENSE_PIN = 14; //Battery voltage measurement
 const uint8_t ESP32_TX_PIN = 8;
-const uint8_t TEMP_MEAS_PIN = 4; //Thermistor measurement
+const uint8_t AUTO_BOOT_PIN = 4; //Vin externe measurement
 
 const uint8_t LED_ORDERING[LED_COUNT] = {1,0,3,5,4,2};
 
