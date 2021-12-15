@@ -6,7 +6,6 @@
         "mcu": "stm32f030f4p6",
         "product_line": "STM32F030x6",
         "variant": "STM32F0xx/KXKMF030F4"
-
     },
     "debug": {
         "jlink_device": "STM32F030F4",
