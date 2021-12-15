@@ -1,5 +1,0 @@
-\.platformio\packages\framework-arduinoststm32                                    pour le fichier boards.txt
-\.platformio\packages\framework-arduinoststm32\variants\STM32F0xx                 pour les dossiers KXXMF.....
-
-https://github.com/STMicroelectronics/STM32_open_pin_data/blob/master/mcu/STM32F030F4Px.xml
-https://github.com/STMicroelectronics/STM32_open_pin_data/blob/master/mcu/STM32F070F6Px.xml
