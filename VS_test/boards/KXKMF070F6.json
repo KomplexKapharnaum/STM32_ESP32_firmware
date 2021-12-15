@@ -6,7 +6,6 @@
         "mcu": "stm32f070x6",
         "product_line": "STM32F070x6",
         "variant": "STM32F0xx/KXKMF070F6"
-
     },
     "debug": {
         "jlink_device": "STM32F070x6",
