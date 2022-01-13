@@ -8,7 +8,7 @@
         "variant": "STM32F0xx/KXKMF070F6"
     },
     "debug": {
-        "jlink_device": "STM32F070x6",
+        "jlink_device": "STM32F070F6",
         "openocd_target": "stm32f0x",
         "svd_path": "STM32F0x0.svd"
     },
