@@ -19,12 +19,21 @@ Dans les préférences, choisir le dossier `STM32_ESP32_firmware` comme "carnet 
 
 Choisir la version HW dans le menu "Hardware version" et mettre à jour l'ID de la carte dans `board_id.h`
 
-### Windows : 
+### pour avoir les bonnes options de compilation : 
 - dans le dossier `STM32_ESP32_firmware\hardware\kxkm\stm32` editer le fichier platform.txt
 - changer le : compiler.path={runtime.tools.arm-none-eabi-gcc-6-2017-q2-update.path}/bin/ 
 - en compiler.path=C:\Users\ririf\AppData\Local\Arduino15\packages\STM32\tools\xpack-arm-none-eabi-gcc\9.2.1-1.1\bin\
 - pour linux peut etre : compiler.path=/usr/bin/
+- pour mac peut etre : compiler.path=/usr/local/bin
 
+## si erreur avec CMSIS :
+télécharger la v4 de CMSIS : https://github.com/ARM-software/CMSIS/archive/refs/heads/master.zip
+remplacer {runtime.tools.CMSIS-5.3.0.path} dans : 
+compiler.arm.cmsis.c.flags="-I{runtime.tools.CMSIS-5.3.0.path}/CMSIS/Core/Include/" [.....]
+compiler.arm.cmsis.ldflags="-L{runtime.tools.CMSIS-5.3.0.path}/CMSIS/Lib/GCC/" -l{build.cmsis_lib_gcc}
+ par le chemin correspondant à la v4 de CMSIS (exemple
+compiler.arm.cmsis.c.flags="-I/Downloads/CMSIS-master/CMSIS/Core/Include/" [.....] 
+compiler.arm.cmsis.ldflags="-L/Downloads/CMSIS-master/CMSIS/Lib/GCC/" -l{build.cmsis_lib_gcc}
 Choisir "Exporter les binaires compilées".
 
 Pour uploader, le sélecteur de type batterie doit être sur Custom. Maintenir le bouton ON/OFF appuyé pendant l'upload.
