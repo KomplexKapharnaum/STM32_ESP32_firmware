@@ -29,11 +29,13 @@ Choisir la version HW dans le menu "Hardware version" et mettre à jour l'ID de 
 ## si erreur avec CMSIS :
 télécharger la v4 de CMSIS : https://github.com/ARM-software/CMSIS/archive/refs/heads/master.zip
 remplacer {runtime.tools.CMSIS-5.3.0.path} dans : 
+
 compiler.arm.cmsis.c.flags="-I{runtime.tools.CMSIS-5.3.0.path}/CMSIS/Core/Include/" [.....]
 compiler.arm.cmsis.ldflags="-L{runtime.tools.CMSIS-5.3.0.path}/CMSIS/Lib/GCC/" -l{build.cmsis_lib_gcc}
  par le chemin correspondant à la v4 de CMSIS (exemple
 compiler.arm.cmsis.c.flags="-I/Downloads/CMSIS-master/CMSIS/Core/Include/" [.....] 
 compiler.arm.cmsis.ldflags="-L/Downloads/CMSIS-master/CMSIS/Lib/GCC/" -l{build.cmsis_lib_gcc}
+
 Choisir "Exporter les binaires compilées".
 
 Pour uploader, le sélecteur de type batterie doit être sur Custom. Maintenir le bouton ON/OFF appuyé pendant l'upload.
