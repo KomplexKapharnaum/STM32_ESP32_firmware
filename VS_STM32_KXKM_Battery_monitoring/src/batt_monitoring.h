@@ -100,8 +100,8 @@ bool initBatteryMonitoring()
   {
     uint8_t cells = findCellCount(getAverageBatteryVoltage(), LIPO_VOLTAGE_BREAKS[0], LIPO_VOLTAGE_BREAKS[6]);
 
-    SERIAL_DEBUG("LiPo");
-    SERIAL_DEBUG(cells);
+    // SERIAL_DEBUG("LiPo");
+    // SERIAL_DEBUG(cells);
 
     for (int i = 0; i < 7; i++)
       _battVoltageBreaks[i] = cells * LIPO_VOLTAGE_BREAKS[i];
@@ -116,8 +116,8 @@ bool initBatteryMonitoring()
   {
     uint8_t cells = findCellCount(getAverageBatteryVoltage(), LIFE_VOLTAGE_BREAKS[0], LIFE_VOLTAGE_BREAKS[6]);
 
-    SERIAL_DEBUG("LiFe");
-    SERIAL_DEBUG(cells);
+    // SERIAL_DEBUG("LiFe");
+    // SERIAL_DEBUG(cells);
 
     for (int i = 0; i < 7; i++)
       _battVoltageBreaks[i] = cells * LIFE_VOLTAGE_BREAKS[i];
@@ -165,10 +165,10 @@ unsigned int readBatteryVoltage()
 
   adcRead /= ADC_READS_COUNT;
 
-  unsigned long millisEnd = millis();
+  // unsigned long millisEnd = millis();
 
-  SERIAL_DEBUG(adcRead);
-  SERIAL_DEBUG(millisEnd - millisStart);
+  // SERIAL_DEBUG(adcRead);
+  // SERIAL_DEBUG(millisEnd - millisStart);
 
   return (adcRead << VOLTAGE_MEAS_DECIMAL_PART) * CALIBRATION_VOLTAGE / readCalibrationValue();
 }
@@ -196,10 +196,10 @@ unsigned int readLoadCurrent()
 
   adcRead /= ADC_READS_COUNT;
 
-  unsigned long millisEnd = millis();
+  // unsigned long millisEnd = millis();
 
-  SERIAL_DEBUG(adcRead);
-  SERIAL_DEBUG(millisEnd - millisStart);
+  // SERIAL_DEBUG(adcRead);
+  // SERIAL_DEBUG(millisEnd - millisStart);
 
   return (adcRead * CURRENT_MEAS_MULTIPLIER1 / CURRENT_MEAS_DIVIDER * CURRENT_MEAS_MULTIPLIER2) << CURRENT_MEAS_DECIMAL_PART;
 }
