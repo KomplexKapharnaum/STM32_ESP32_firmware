@@ -44,8 +44,8 @@ const uint8_t MAIN_OUT_ENABLE_PIN = 6; //Load switch enable line
 const uint8_t ESP32_ENABLE_PIN = 7; //ESP32 enable line
 const uint8_t PUSH_BUTTON_DETECT_PIN = 13; //Main On/off push button
 const uint8_t BATT_TYPE_SELECTOR_PINS[] = {10,11}; //3-way selector
-const uint8_t LOAD_CURRENT_SENSE_PIN = 5; //Load switch current measurement
-const uint8_t BATT_VOLTAGE_SENSE_PIN = 14; //Battery voltage measurement
+const uint8_t LOAD_CURRENT_SENSE_PIN = A0; //Load switch current measurement
+const uint8_t BATT_VOLTAGE_SENSE_PIN = A2; //Battery voltage measurement
 const uint8_t ESP32_TX_PIN = 8;
 const uint8_t AUTO_BOOT_PIN = 4; //Vin externe measurement
 
