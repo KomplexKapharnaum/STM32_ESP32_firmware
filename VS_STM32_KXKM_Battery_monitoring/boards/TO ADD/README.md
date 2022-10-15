@@ -26,7 +26,7 @@ build_flags = -Os -DHAL_IWDG_MODULE_ENABLED
 ...
 ```
 
-* copier les fichiers boards.txt & repertoire KXKMF030F4 & KXKMF070F6
+* copier les fichiers boards.txt & repertoire KXKMF030F4 , KXKMF070F6
 * dans leur dossier respectif: ....\. :\Users\xxxx\.platformio\packages\framework-arduinoststm32 pour le fichier boards.txt
 * et ....\. :\Users\xxxx\.platformio\packages\framework-arduinoststm32\variants\STM32F0xx pour les dossiers KXKMF0
 # Doc
