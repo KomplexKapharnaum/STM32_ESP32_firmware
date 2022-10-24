@@ -1,6 +1,8 @@
 /*
 KXKM - ESP32 audio & battery module
 STM32 ADC calib test
+REMEMBER TO SET THE SUPPLY VOLTAGE TO 24V TO THE BATT CALIBRATE !
+
 */
 #include "Arduino.h"
 #include <AceButton.h>
