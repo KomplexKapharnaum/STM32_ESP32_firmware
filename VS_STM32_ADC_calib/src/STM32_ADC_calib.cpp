@@ -72,7 +72,7 @@ void setup() {
   analogReadResolution(12);
 
   Serial1.begin(115200);
-
+  Serial1.println("----- STARTED -------");
   Serial1.print("OB : ");
   Serial1.println(readCalibrationValue());
 
@@ -84,15 +84,15 @@ void setup() {
   }
   adcRead /= ADC_AVG_COUNT;
 
-  delay(2000);
+  delay(500);
 
   Serial1.print("Storing ");
   Serial1.println(adcRead);
 
-  delay(1000);
+  delay(500);
 
   storeCalibrationValue(adcRead);
-
+  Serial1.println("----- STORED -------");
 }
 
 void loop() {

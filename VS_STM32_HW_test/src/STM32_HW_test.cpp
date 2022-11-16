@@ -105,8 +105,6 @@ ace_button::AceButton button(PUSH_BUTTON_DETECT_PIN, LOW);
 unsigned long lastSerialSend = 0;
 bool calibrationDone = false;
 
-
-
 void clearLeds()
 {
   for (int i = 0; i < 4; i++)
@@ -372,13 +370,29 @@ void loop() {
         adcRead /= ADC_AVG_CALIB;
 
         // Store the current reading as calibration value.
-        storeCalibrationValue(adcRead);
+        
+      uint16_t ob = (HAL_FLASHEx_OBGetUserData(OB_DATA_ADDRESS_DATA1) << 8) + HAL_FLASHEx_OBGetUserData(OB_DATA_ADDRESS_DATA0);
+       if (ob == 0xFFFF)
+       {        
         openSerial();
         Serial1.print("Cal : ");
         Serial1.println(adcRead);
         closeSerial();
-
+        storeCalibrationValue(adcRead);
+        openSerial();
+        Serial1.println("CALIBRATION AS DONE");
+        closeSerial(); 
         calibrationDone = true;
+        delay(5000);
+       }
+       else
+       {
+        openSerial();
+        Serial1.println("CALIBRATION ALREADY DONE");
+        closeSerial();
+        delay(5000);
+        calibrationDone = true;
+       }
       }
 
       break;

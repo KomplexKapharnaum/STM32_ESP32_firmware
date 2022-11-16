@@ -100,8 +100,8 @@ bool initBatteryMonitoring()
   {
     uint8_t cells = findCellCount(getAverageBatteryVoltage(), LIPO_VOLTAGE_BREAKS[0], LIPO_VOLTAGE_BREAKS[6]);
 
-    // SERIAL_DEBUG("LiPo");
-    // SERIAL_DEBUG(cells);
+     //SERIAL_DEBUG("LiPo");
+     //SERIAL_DEBUG(cells);
 
     for (int i = 0; i < 7; i++)
       _battVoltageBreaks[i] = cells * LIPO_VOLTAGE_BREAKS[i];

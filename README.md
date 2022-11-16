@@ -1,8 +1,6 @@
-# KXKM - ESP32 Audio & battery module firmware
+# KXKM - ESP32 Audio & battery module firmware V3 for STM32F070F6
 
-This repo is a complete Arduino sketchbook with libraries, hardware definitions, etc.
-
-Clone it then point Arduino IDE to it using the Preferences > Sketchbook location.
+This repo is a platformIO code to V3 kxkm
 
 _This repository contains submodules._
 
@@ -21,13 +19,21 @@ In order to update the repository submodules content, you can execute the follow
 ## ESP32 installation
 Execute `hardware/espressif/esp32/tools/get.py`
 
-
-## STM32 Flashing
-You have to export the compiled binary file first (Arduino > Sketch menu).
-
-### Using JLink
+## STM32 Flashing Using JLink
 * Keep the push button pressed to supply power while the MCU is being reprogrammed
 * Slide the battery type selector to "Custom" position
-* Run the following commands :
-	cd <sketchName>
-	JLinkExe -commanderscript STM32_flash.jlink
+needed the jlink software : https://www.segger.com/downloads/jlink/
+
+## STM32 calibrating ADC value and store in option byte to accurate reading battery voltage
+1 - upload VS-STM32-ADC-calib
+2 - connect serial with TX/RX reversed to read serial from the STM32 and not from the ESP
+3 - power the board with 24V power to calibrate ADC
+4 - reset board and read serial ouptut :
+							—— STARTED ———
+							OB : 65535
+							Storing 3066
+							—— STORED ———
+If  -- STORED -- printed, the adc are calibrated and stored in option byte
+
+## STM32 coprocessor - battery monitoring function
+change board ID 	before upload VS_STM32-KXKM-Battery_monitoring			
