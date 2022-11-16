@@ -29,11 +29,7 @@ needed the jlink software : https://www.segger.com/downloads/jlink/
 2 - connect serial with TX/RX reversed to read serial from the STM32 and not from the ESP
 3 - power the board with 24V power to calibrate ADC
 4 - reset board and read serial ouptut :
-							—— STARTED ———
-							OB : 65535
-							Storing 3066
-							—— STORED ———
-If  -- STORED -- printed, the adc are calibrated and stored in option byte
+When:  -- STORED --  as printed, the adc are calibrated and stored in option byte
 
 ## STM32 coprocessor - battery monitoring function
 change board ID 	before upload VS_STM32-KXKM-Battery_monitoring			
