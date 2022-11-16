@@ -8,3 +8,4 @@ hardware/.DS_Store
 ESP32_HW_test/.DS_Store
 ESP32_Energy_API_test/.DS_Store
 .DS_Store
+VS_STM32_KXKM_Battery_monitoring/.vscode/extensions.json
