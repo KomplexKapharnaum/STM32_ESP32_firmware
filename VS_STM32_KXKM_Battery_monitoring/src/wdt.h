@@ -17,7 +17,7 @@ void initWatchdog()
                           = LsiFreq / 128 */
   IwdgHandle.Init.Prescaler = IWDG_PRESCALER_32;
   //IwdgHandle.Init.Reload    = uwLsiFreq/128;
-  IwdgHandle.Init.Reload    = 312; //40000 / 128
+  IwdgHandle.Init.Reload  = 312; //40000 / 128
   IwdgHandle.Init.Window = IWDG_WINDOW_DISABLE;
 
   HAL_IWDG_Init(&IwdgHandle);

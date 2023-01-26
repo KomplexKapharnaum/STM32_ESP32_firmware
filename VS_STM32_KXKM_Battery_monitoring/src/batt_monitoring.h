@@ -100,8 +100,8 @@ bool initBatteryMonitoring()
   {
     uint8_t cells = findCellCount(getAverageBatteryVoltage(), LIPO_VOLTAGE_BREAKS[0], LIPO_VOLTAGE_BREAKS[6]);
 
-     //SERIAL_DEBUG("LiPo");
-     //SERIAL_DEBUG(cells);
+    // SERIAL_DEBUG("LiPo");
+    // SERIAL_DEBUG(cells);
 
     for (int i = 0; i < 7; i++)
       _battVoltageBreaks[i] = cells * LIPO_VOLTAGE_BREAKS[i];
@@ -230,7 +230,10 @@ int readApproxTempDegC()
   digitalWrite(TEMP_MEAS_PIN, LOW); // Avoid thermistor self heating
 
   return approximateTemperatureInt(adcRead);
+#elif HW_REVISION == 3
+ return 0;
 #endif
+
 }
 
 /* Return the stat of autoboot
@@ -304,11 +307,13 @@ KXKM_STM32_Energy::BatteryType getBatteryTypeSelectorState()
  */
 uint16_t readCalibrationValue()
 {
+  //uint16_t ob = HARD_CALIB_VAL;
+  
   uint16_t ob = (HAL_FLASHEx_OBGetUserData(OB_DATA_ADDRESS_DATA1) << 8) + HAL_FLASHEx_OBGetUserData(OB_DATA_ADDRESS_DATA0);
 
-  if (ob == 0xFFFF)                                // Unprogrammed
-    ob = 24000 * 316 / (316 + 2700) * 4095 / 3300; // Default value : voltage is sensed through a 31.6k / 270k resistive divider, referenced to 3.3V
-
+    if (ob == 0xFFFF)                                // Unprogrammed
+      ob = 24000 * 316 / (316 + 2700) * 4095 / 3300; // Default value : voltage is sensed through a 31.6k / 270k resistive divider, referenced to 3.3V
+    
   return ob;
 }
 
