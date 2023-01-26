@@ -29,8 +29,9 @@ needed the jlink software : https://www.segger.com/downloads/jlink/
 ## STM32 calibrating ADC value and store in option byte to accurate reading battery voltage
 
 ##### 1 - upload VS-STM32-ADC-calib
-##### 2 - connect serial with TX/RX reversed to read serial from the STM32 and not from the ESP
-##### 3 - power the board with 24V power to calibrate ADC 4 - reset board and read serial ouptut :
+##### 2 - power the board with 24V power to calibrate ADC 4 - reset board and read serial ouptut :
+##### 3 - connect serial with TX/RX reversed to read serial from the STM32 and not from the ESP
+
 
 
 When:  -- STORED --  as printed, the adc are calibrated and stored in option byte
