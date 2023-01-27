@@ -27,15 +27,10 @@ public:
        The STM32 will answer with the board revision number. */
     GET_HW_REVISION = 'H',
 
-    /* Get hardware revision.
-       No argument.
-       The STM32 will answer with the board revision number. */
-    GET_HW_ID = 'X',
-
     /* Get board ID.
        No argument.
        The STM32 will answer with the board ID. */
-    GET_BOARD_ID = 'I',
+    GET_HW_ID = 'I',
 
     /* Get API version.
        No argument.

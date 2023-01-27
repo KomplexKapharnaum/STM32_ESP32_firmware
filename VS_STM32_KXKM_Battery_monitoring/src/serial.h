@@ -77,7 +77,7 @@ void serialEvent1()
         sendAnswer(HW_REVISION);
         break;
         
-      case KXKM_STM32_Energy::GET_BOARD_ID:
+      case KXKM_STM32_Energy::GET_HW_ID:
         sendAnswer(BOARD_ID);
         break;
         
