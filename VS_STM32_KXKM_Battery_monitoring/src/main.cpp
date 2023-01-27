@@ -29,7 +29,7 @@ Richard Fontaine - 03/2021 (adapt pio)
 #define HW_REVISION 3
 
 // Firmware version
-const int FIRMWARE_VERSION = 4;
+#define FIRMWARE_VERSION 4
 
 // calibration value
 // #define HARD_CALIB_VAL 3098
