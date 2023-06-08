@@ -6,6 +6,7 @@
  *    * pos 1 : Li-Po batteries - Nominal cell voltage 3.7V, max cell voltage 4.2V, min cell voltage 3.0V
  *    * pos 2 : Li-Fe batteries - Nominal cell voltage 3.3V, max cell voltage 3.6V, min cell voltage 2.8V
  *    * pos 3 : custom. By default the battery voltage is not monitored, except if custom min/max voltages are
+ *    * auto boot : the board will boot automatically with jumper when power is applied. The battery voltage is not monitored.
  *              received on the serial port.
  *
  * The number of cells is determined at startup by measuring the initial voltage.
@@ -128,6 +129,7 @@ bool initBatteryMonitoring()
     break;
   }
   case KXKM_STM32_Energy::BATTERY_CUSTOM: // Custom. Battery monitoring disabled or will be set later.
+  case KXKM_STM32_Energy::AUTO_BOOT:     // Auto boot. Battery monitoring disabled or will be set later.
   default:
     // SERIAL_DEBUG("custom");
     for (int i = 0; i < 7; i++)
@@ -231,9 +233,8 @@ int readApproxTempDegC()
 
   return approximateTemperatureInt(adcRead);
 #elif HW_REVISION == 3
- return 0;
+  return 0;
 #endif
-
 }
 
 /* Return the stat of autoboot
@@ -242,7 +243,7 @@ int readApproxTempDegC()
 bool getAutoBootStatus()
 {
 #if HW_REVISION > 2
-  if (digitalRead(AUTO_BOOT_PIN))
+  if (autoBoot)
   {
     return true;
   }
@@ -293,27 +294,34 @@ int getBatteryPercentage()
 /* Read the battery type selector */
 KXKM_STM32_Energy::BatteryType getBatteryTypeSelectorState()
 {
-  if (!digitalRead(BATT_TYPE_SELECTOR_PINS[0]))
-    return KXKM_STM32_Energy::BATTERY_LIPO;
+  if (getAutoBootStatus()) // If auto boot, force custom mode
+  {
+    return KXKM_STM32_Energy::AUTO_BOOT;
+  }
+  else // Else, read the selector
+  {
+    if (!digitalRead(BATT_TYPE_SELECTOR_PINS[0]))
+      return KXKM_STM32_Energy::BATTERY_LIPO;
 
-  else if (!digitalRead(BATT_TYPE_SELECTOR_PINS[1]))
-    return KXKM_STM32_Energy::BATTERY_LIFE;
+    else if (!digitalRead(BATT_TYPE_SELECTOR_PINS[1]))
+      return KXKM_STM32_Energy::BATTERY_LIFE;
 
-  else
-    return KXKM_STM32_Energy::BATTERY_CUSTOM;
+    else
+      return KXKM_STM32_Energy::BATTERY_CUSTOM;
+  }
 }
 
 /* Read the calibration value stored in the option byte.
  */
 uint16_t readCalibrationValue()
 {
-  //uint16_t ob = HARD_CALIB_VAL;
-  
+  // uint16_t ob = HARD_CALIB_VAL;
+
   uint16_t ob = (HAL_FLASHEx_OBGetUserData(OB_DATA_ADDRESS_DATA1) << 8) + HAL_FLASHEx_OBGetUserData(OB_DATA_ADDRESS_DATA0);
 
-    if (ob == 0xFFFF)                                // Unprogrammed
-      ob = 24000 * 316 / (316 + 2700) * 4095 / 3300; // Default value : voltage is sensed through a 31.6k / 270k resistive divider, referenced to 3.3V
-    
+  if (ob == 0xFFFF)                                // Unprogrammed
+    ob = 24000 * 316 / (316 + 2700) * 4095 / 3300; // Default value : voltage is sensed through a 31.6k / 270k resistive divider, referenced to 3.3V
+
   return ob;
 }
 

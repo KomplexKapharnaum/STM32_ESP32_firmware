@@ -20,10 +20,11 @@ The processor serial port is available on the ESP32 programmation connector. RX 
 
 Tom Magnier - 04/2018
 Richard Fontaine - 03/2021 (adapt pio)
+Clément SAILLANT 06/2023 (adapt to V3.2)
 */
 
 // BOARD_ID
-#define BOARD_ID 166
+#define BOARD_ID 171
 
 // HW_REVISION
 #define HW_REVISION 3
@@ -68,6 +69,7 @@ unsigned long battLevelDisplayStartTime;
 unsigned long customLedSetTime;
 unsigned long lastStateChangeTime;
 unsigned long criticalSectionEndTime;
+bool autoBoot = false;
 
 #if HW_REVISION == 2
 #include "AdcToTemperature.h"
@@ -92,6 +94,20 @@ void setup()
   pinMode(MAIN_OUT_ENABLE_PIN, OUTPUT);
   pinMode(PUSH_BUTTON_DETECT_PIN, INPUT);
 
+  // set the initial state of autoboot pin
+#if HW_REVISION > 2
+  if (digitalRead(AUTO_BOOT_PIN))
+  {
+    autoBoot = true;
+  }
+  else
+  {
+    autoBoot = false;
+  }
+#else
+  autoBoot = false;
+#endif
+
 #if HW_REVISION == 2
   pinMode(TEMP_MEAS_PIN, OUTPUT);
   digitalWrite(TEMP_MEAS_PIN, LOW); // Avoid thermistor self heating
@@ -111,16 +127,28 @@ void setup()
   buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureLongPress);
   buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressClickBeforeDoubleClick);
 
-  // To keep interactions consistent, a long press is required to start up the board.
+  // set the timing delays for the button
+  buttonConfig->setClickDelay(300);
+  /*
+  buttonConfig->setDoubleClickDelay(clickDelay);
+  buttonConfig->setLongPressDelay(1000);
+  buttonConfig->setRepeatPressDelay(1000);
+  buttonConfig->setRepeatPressInterval(1000);
+*/
+
+  // To keep interactions consistent, a long press is required to start up the board if it's not in auto boot mode.
   // If the MCU is still powered at the end of the delay, we can move along.
-  delay(button.getButtonConfig()->getLongPressDelay());
+  if (!getAutoBootStatus())
+  {
+    delay(button.getButtonConfig()->getLongPressDelay());
+  }
 
   currentState = INIT;
 
   initLedGauge();
 
   // Shut down immediately if the battery type could not be determined and the
-  // selector is not in "Custom" position
+  // selector is not in "Custom" position or board as not in auto boot mode.
   if (!initBatteryMonitoring())
   {
     // Blink red LED while the board is powered (button pressed)

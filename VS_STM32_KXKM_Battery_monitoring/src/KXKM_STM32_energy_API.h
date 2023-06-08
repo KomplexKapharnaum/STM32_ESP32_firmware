@@ -152,7 +152,8 @@ public:
    {
       BATTERY_LIPO = 0,
       BATTERY_LIFE = 1,
-      BATTERY_CUSTOM = 2
+      BATTERY_CUSTOM = 2,
+      AUTO_BOOT = 3
    };
 
    static bool hasArgument(CommandType cmd)

@@ -1,7 +1,10 @@
 {
     "build": {
         "cpu": "cortex-m0",
-        "extra_flags": "-DSTM32F030x6",
+        "extra_flags": 
+        "-DSTM32F030x6
+        -DARDUINO_GENERIC_F030F4PX
+        -DVARIANT_H=\\\"variant_generic.h\\\"",
         "f_cpu": "48000000L",
         "mcu": "stm32f030f4p6",
         "product_line": "STM32F030x6",
