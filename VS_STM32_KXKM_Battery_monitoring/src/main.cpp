@@ -24,7 +24,7 @@ Clément SAILLANT 06/2023 (adapt to V3.2)
 */
 
 // BOARD_ID
-#define BOARD_ID 171
+#define BOARD_ID 239
 
 // HW_REVISION
 #define HW_REVISION 3

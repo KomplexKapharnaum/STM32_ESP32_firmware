@@ -7,7 +7,6 @@
     "git.ignoreWindowsGit27Warning": true,
     "explorer.confirmDragAndDrop": false,
     "workbench.statusBar.visible": true,
-    "workbench.activityBar.visible": true,
     "[html]": {
         "editor.defaultFormatter": "lonefy.vscode-JS-CSS-HTML-formatter"
     },

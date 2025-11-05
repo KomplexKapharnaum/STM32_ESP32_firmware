@@ -18,6 +18,7 @@ def _jlink_cmd_script(env, source):
 env.Replace(
     __jlink_cmd_script=_jlink_cmd_script,
     # UPLOADER="C:/Program Files (x86)/SEGGER/JLink_V640/JLink.exe",
+    # UPLOADER="/usr/local/bin/JLinkExe",
     UPLOADERFLAGS=[
         "-device", "STM32F070F6",
         "-speed", "4000",
