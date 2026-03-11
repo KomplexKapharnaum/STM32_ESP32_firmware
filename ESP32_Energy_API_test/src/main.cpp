@@ -47,8 +47,7 @@ enum test_type_t {
 
 RemoteDebug Debug;
 
-const char* ssid = "ssid";
-const char* password = "password";
+#include "credentials.h"
 
 void processCmdRemoteDebug();
 void beginTest(test_type_t test);
@@ -258,6 +257,7 @@ void beginTest(test_type_t test)
     case TEST_SELF_RESET:
       debugI("Self reset");
       sendSerialCommand(KXKM_STM32_Energy::REQUEST_RESET);
+      break;
 
     default:
       break;

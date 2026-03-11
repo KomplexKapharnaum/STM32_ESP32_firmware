@@ -240,7 +240,7 @@ int getBatteryPercentage()
   while (lowerIdx < 6)
   {
     uint8_t upperIdx = lowerIdx + 1;
-    while (_battVoltageBreaks[upperIdx] == 0 && upperIdx <= 6)
+    while (upperIdx <= 6 && _battVoltageBreaks[upperIdx] == 0)
       upperIdx++;
 
     unsigned int battVoltage = getAverageBatteryVoltage();
