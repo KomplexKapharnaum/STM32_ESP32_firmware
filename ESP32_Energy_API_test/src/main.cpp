@@ -47,8 +47,8 @@ enum test_type_t {
 
 RemoteDebug Debug;
 
-const char* ssid = "ssid";
-const char* password = "password";
+// WiFi credentials — see credentials.h.example
+#include "credentials.h"
 
 void processCmdRemoteDebug();
 void beginTest(test_type_t test);
