@@ -64,11 +64,15 @@ void setup() {
   
   WiFi.begin(ssid, password);
 
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
+  // Wait for connection (30s timeout)
+  unsigned long wifiStart = millis();
+  while (WiFi.status() != WL_CONNECTED && (millis() - wifiStart) < 30000) {
     static int ledId = 0;
     setSingleLed(ledId++ % 6);
     delay(300);
+  }
+  if (WiFi.status() != WL_CONNECTED) {
+    debugI("WiFi connection timeout after 30s");
   }
 
   // Register host name in WiFi and mDNS
